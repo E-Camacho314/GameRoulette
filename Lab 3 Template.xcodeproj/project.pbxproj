@@ -39,16 +39,6 @@
 			path = "Lab 3 Template";
 			sourceTree = "<group>";
 		};
-		6AD01A342E52542F005155A8 /* Lab 3 TemplateTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "Lab 3 TemplateTests";
-			sourceTree = "<group>";
-		};
-		6AD01A3E2E52542F005155A8 /* Lab 3 TemplateUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "Lab 3 TemplateUITests";
-			sourceTree = "<group>";
-		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -81,8 +71,6 @@
 			isa = PBXGroup;
 			children = (
 				6AD01A262E52542E005155A8 /* Lab 3 Template */,
-				6AD01A342E52542F005155A8 /* Lab 3 TemplateTests */,
-				6AD01A3E2E52542F005155A8 /* Lab 3 TemplateUITests */,
 				A0C2E5B52F6A0CFE00AEB654 /* Frameworks */,
 				6AD01A252E52542E005155A8 /* Products */,
 			);
@@ -144,9 +132,6 @@
 			dependencies = (
 				6AD01A332E52542F005155A8 /* PBXTargetDependency */,
 			);
-			fileSystemSynchronizedGroups = (
-				6AD01A342E52542F005155A8 /* Lab 3 TemplateTests */,
-			);
 			name = "Lab 3 TemplateTests";
 			packageProductDependencies = (
 			);
@@ -166,9 +151,6 @@
 			);
 			dependencies = (
 				6AD01A3D2E52542F005155A8 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				6AD01A3E2E52542F005155A8 /* Lab 3 TemplateUITests */,
 			);
 			name = "Lab 3 TemplateUITests";
 			packageProductDependencies = (

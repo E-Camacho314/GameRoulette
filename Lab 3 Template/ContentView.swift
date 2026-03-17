@@ -4,6 +4,45 @@
 
 import SwiftUI
 
+// MARK: - Steam Test View
+
+struct SteamGamesView: View {
+    @State private var games: [SteamGame] = []
+    @State private var isLoading = false
+    @State private var errorMessage: String?
+
+    var body: some View {
+        NavigationStack {
+            Group {
+                if isLoading {
+                    ProgressView("Loading games...")
+                } else if let error = errorMessage {
+                    Text("Error: \(error)").foregroundColor(.red).padding()
+                } else {
+                    List(games) { game in
+                        VStack(alignment: .leading) {
+                            Text(game.name)
+                            Text("App ID: \(game.id)").font(.caption).foregroundColor(.gray)
+                        }
+                    }
+                }
+            }
+            .navigationTitle("Steam Games (\(games.count))")
+            .task {
+                isLoading = true
+                do {
+                    games = try await SteamService.shared.fetchAllGames()
+                } catch {
+                    errorMessage = error.localizedDescription
+                }
+                isLoading = false
+            }
+        }
+    }
+}
+
+// MARK: - Original Flashcard Code
+
 enum CardTheme: String, CaseIterable {
     case blue, green, purple, orange, gradientBlue, gradientPink
     var background: LinearGradient {
