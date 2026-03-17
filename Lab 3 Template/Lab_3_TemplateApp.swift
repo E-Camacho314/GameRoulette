@@ -1,6 +1,3 @@
-//
-//  Lab_3_TemplateApp.swift
-//
 
 import SwiftUI
 import FirebaseCore

@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		A0C2E5B72F6A0CFE00AEB654 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = A0C2E5B62F6A0CFE00AEB654 /* FirebaseCore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		6AD01A322E52542F005155A8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A0C2E5B72F6A0CFE00AEB654 /* FirebaseCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,6 +83,7 @@
 				6AD01A262E52542E005155A8 /* Lab 3 Template */,
 				6AD01A342E52542F005155A8 /* Lab 3 TemplateTests */,
 				6AD01A3E2E52542F005155A8 /* Lab 3 TemplateUITests */,
+				A0C2E5B52F6A0CFE00AEB654 /* Frameworks */,
 				6AD01A252E52542E005155A8 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -90,6 +96,13 @@
 				6AD01A3B2E52542F005155A8 /* Lab 3 TemplateUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		A0C2E5B52F6A0CFE00AEB654 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -112,6 +125,7 @@
 			);
 			name = "Lab 3 Template";
 			packageProductDependencies = (
+				A0C2E5B62F6A0CFE00AEB654 /* FirebaseCore */,
 			);
 			productName = "Lab 3 Template";
 			productReference = 6AD01A242E52542E005155A8 /* Lab 3 Template.app */;
@@ -578,6 +592,14 @@
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		A0C2E5B62F6A0CFE00AEB654 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A0C2E5B42F69FD5B00AEB654 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 6AD01A1C2E52542E005155A8 /* Project object */;
 }
