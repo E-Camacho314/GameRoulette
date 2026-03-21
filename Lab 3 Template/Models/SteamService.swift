@@ -91,6 +91,7 @@ class SteamService {
                 title: details?.name,
                 genres: details?.genres?.map { $0.description },
                 categories: details?.categories?.map { $0.description },
+                contentDescriptors: details?.content_descriptors?.notes,
                 priority: "None",
                 description: details?.short_description,
                 headerImage: details?.header_image,

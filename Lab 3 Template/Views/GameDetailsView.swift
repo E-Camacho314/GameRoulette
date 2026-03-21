@@ -89,6 +89,13 @@ struct GameDetailView: View {
                     }
                 }
                 
+                if let notes = game.contentDescriptors {
+                    Text(notes)
+                        .font(.caption)
+                        .foregroundColor(.red)
+                        .padding(.horizontal)
+                }
+                
                 if game.inLibrary {
                     VStack(spacing: 15) {
                         Picker("Priority", selection: Binding(
