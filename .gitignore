@@ -1,4 +1,6 @@
 GoogleService-Info.plist
 **/GoogleService-Info.plist
+Secrets.swift
+**/Secrets.swift
 
 
