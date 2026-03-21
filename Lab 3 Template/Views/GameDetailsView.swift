@@ -55,7 +55,13 @@ struct GameDetailView: View {
                         .cornerRadius(8)
                 }
                 
-                Text(game.genre ?? "Unknown Genre")
+                Text(game.genres?.joined(separator: ", ") ?? "Unknown Genre")
+                    .font(.body)
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(.secondary)
+                    .padding(.horizontal)
+                
+                Text(game.categories?.joined(separator: ", ") ?? "Unknown Category")
                     .font(.body)
                     .multilineTextAlignment(.center)
                     .foregroundColor(.secondary)
@@ -66,6 +72,22 @@ struct GameDetailView: View {
                     .multilineTextAlignment(.center)
                     .foregroundColor(.secondary)
                     .padding(.horizontal)
+                
+                ScrollView(.horizontal) {
+                    HStack {
+                        ForEach(game.screenshots ?? [], id: \.self) { url in
+                            AsyncImage(url: URL(string: url)) { image in
+                                image
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(height: 150)
+                                    .cornerRadius(10)
+                            } placeholder: {
+                                ProgressView()
+                            }
+                        }
+                    }
+                }
                 
                 if game.inLibrary {
                     VStack(spacing: 15) {

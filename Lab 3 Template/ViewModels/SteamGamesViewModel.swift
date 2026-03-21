@@ -15,7 +15,6 @@ class SteamGamesViewModel: ObservableObject {
     
     func loadGames() async {
         
-        // prevent re-fetching
         if !AppManager.steamGames.isEmpty {
             games = AppManager.steamGames
             return

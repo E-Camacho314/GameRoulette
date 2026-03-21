@@ -9,21 +9,25 @@ import Foundation
 class LibraryGame: Codable, Identifiable, ObservableObject {
     let id: Int
     let title: String?
-    let genre: String?
+    let genres: [String]?
+    let categories: [String]?
     var priority: String?
     let description: String?
     let headerImage: String?
     let developers: [String]?
+    var screenshots: [String]?
     var inLibrary: Bool
 
-    init(id: Int, title: String?, genre: String?, priority: String?, description: String?, headerImage: String?, developers: [String]?, inLibrary: Bool) {
+    init(id: Int, title: String?, genres: [String]?, categories: [String]?, priority: String?, description: String?, headerImage: String?, developers: [String]?, screenshots: [String]?, inLibrary: Bool) {
         self.id = id
         self.title = title
-        self.genre = genre
+        self.genres = genres
+        self.categories = categories
         self.priority = priority
         self.description = description
         self.headerImage = headerImage
         self.developers = developers
+        self.screenshots = screenshots
         self.inLibrary = inLibrary
     }
 }
