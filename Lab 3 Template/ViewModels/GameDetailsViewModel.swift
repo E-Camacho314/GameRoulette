@@ -9,6 +9,7 @@ import SwiftUI
 import MapKit
 
 struct GameDetailView: View {
+    @StateObject private var libraryManager = LibraryManager.shared
     @State var game: LibraryGame
     
     let priorities = ["High", "Medium", "Low"]
@@ -103,9 +104,16 @@ struct GameDetailView: View {
                         }
                     }
                 }
-                
                 Button(action: {
                     game.inLibrary.toggle()
+                    
+                    if game.inLibrary {
+                        if !libraryManager.userLibrary.contains(where: { $0.id == game.id }) {
+                            libraryManager.userLibrary.append(game)
+                        }
+                    } else {
+                        libraryManager.userLibrary.removeAll { $0.id == game.id }
+                    }
                 }) {
                     Text(game.inLibrary ? "Delete from Library" : "Add to Library")
                         .fontWeight(.bold)
