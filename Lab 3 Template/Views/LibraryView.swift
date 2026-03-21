@@ -17,8 +17,25 @@ struct LibraryView: View {
                     Text("Error: \(error)").foregroundColor(.red).padding()
                 } else {
                     List(libraryManager.userLibrary) { game in
-                        NavigationLink(game.title ?? "Unknown Title") {
+                        NavigationLink {
                             GameDetailView(game: game)
+                        } label: {
+                            HStack {
+                                Text(game.title ?? "Unknown Title")
+                                
+                                Spacer()
+                                
+                                if let priority = game.priority {
+                                    Text(priority)
+                                        .font(.caption)
+                                        .fontWeight(.bold)
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .background(priorityColor(priority))
+                                        .cornerRadius(6)
+                                }
+                            }
                         }
                     }
                 }

@@ -35,6 +35,7 @@ class LibraryManager: ObservableObject {
     private init() {}
 }
 
-struct AppManager {
-    static var allGames: [LibraryGame] = []
+class AppManager {
+    static var steamGames: [SteamGame] = []
+    static var gameCache: [Int: LibraryGame] = [:]
 }

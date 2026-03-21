@@ -7,77 +7,54 @@ import SwiftUI
 // MARK: - Steam Test View
 
 struct SteamGamesView: View {
-    @State private var initGames: [SteamGame] = []
-    @State private var detailedGames: [LibraryGame] = []
-    @State private var isLoading = false
-    @State private var errorMessage: String?
-
+    
+    @StateObject private var viewModel = SteamGamesViewModel()
+    
     var body: some View {
         NavigationStack {
+            
             Group {
-                if isLoading {
+                
+                if viewModel.isLoading {
                     ProgressView("Loading games...")
-                } else if let error = errorMessage {
-                    Text("Error: \(error)").foregroundColor(.red).padding()
-                } else {
-                    List(AppManager.allGames) { game in
-                        NavigationLink(game.title ?? "Unknown Title") {
-                            GameDetailView(game: game)
+                }
+                
+                else if let error = viewModel.errorMessage {
+                    Text("Error: \(error)")
+                        .foregroundColor(.red)
+                }
+                
+                else {
+                    List(viewModel.games) { game in
+                        
+                        NavigationLink(game.name) {
+                            GameDetailLoaderView(appid: game.id)
                         }
+                        
                     }
                 }
             }
-            .navigationTitle("Steam Games (\(AppManager.allGames.count))")
+            
+            .navigationTitle("Steam Games (\(viewModel.games.count))")
+            
             .toolbar {
+                
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    
                     NavigationLink(destination: LibraryView()) {
                         Image(systemName: "books.vertical")
-                            .font(.title2)
                     }
-                    Button(action: {
-                        print("Search tapped — not implemented")
-                    }) {
+                    
+                    Button {
+                        print("Search not implemented")
+                    } label: {
                         Image(systemName: "magnifyingglass")
-                            .font(.title2)
                     }
                 }
             }
+            
             .task {
-                
-                guard AppManager.allGames.isEmpty else { return }
-                
-                isLoading = true
-                do {
-                    // Fetch all basic Steam games
-                    initGames = try await SteamService.shared.fetchAllGames()
-                    
-                    var tempDetailed: [LibraryGame] = []
-                    
-                    for (index, game) in initGames.prefix(500).enumerated() {
-                        do {
-                            print("Fetching details for appid \(game.id) (\(index + 1)/500)...")
-                            
-                            // fetch details
-                            if let details = try await SteamService.shared.fetchGameDetails(appid: game.id) {
-                                tempDetailed.append(details)
-                                print("✅ Fetched: \(details.title ?? "Unknown Title")")
-                            } else {
-                                // success: false returned from Steam API
-                                print("⚠️ Skipping appid \(game.id) — no details returned")
-                            }
-                            
-                        } catch {
-                            // network, JSON decoding, or other errors
-                            print("❌ Error fetching appid \(game.id): \(error.localizedDescription)")
-                        }
-                    }
-                    
-                    AppManager.allGames = tempDetailed
-                    
-                } catch {
-                    errorMessage = error.localizedDescription
-                }
-                isLoading = false
+                await viewModel.loadGames()
             }
         }
     }
