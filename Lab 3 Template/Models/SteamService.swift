@@ -23,11 +23,30 @@ struct SteamGameDetails: Decodable {
     let header_image: String?
     let developers: [String]?
     let genres: [Genre]?
+    let categories: [Category]?
+    let screenshots: [Screenshot]?
+    let content_descriptors: ContentDescriptors?
 }
 
 struct Genre: Decodable {
     let id: String
     let description: String
+}
+
+struct Category: Codable {
+    let id: Int
+    let description: String
+}
+
+struct Screenshot: Codable, Identifiable {
+    let id: Int
+    let path_thumbnail: String
+    let path_full: String
+}
+
+struct ContentDescriptors: Codable {
+    let ids: [Int]
+    let notes: String?
 }
 
 struct GameDetailsWrapper: Decodable {
@@ -54,7 +73,6 @@ class SteamService {
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
             
-            // Quick check for HTML (starts with "<")
             if let firstChar = String(data: data, encoding: .utf8)?.first, firstChar == "<" {
                 print("Skipping appid \(appid) — received HTML instead of JSON")
                 return nil
@@ -71,11 +89,14 @@ class SteamService {
             return LibraryGame(
                 id: appid,
                 title: details?.name,
-                genre: details?.genres?.first?.description,
+                genres: details?.genres?.map { $0.description },
+                categories: details?.categories?.map { $0.description },
                 priority: "None",
                 description: details?.short_description,
                 headerImage: details?.header_image,
                 developers: details?.developers,
+                screenshots: details?.screenshots?.map { $0.path_full },
+                
                 inLibrary: false
             )
             
