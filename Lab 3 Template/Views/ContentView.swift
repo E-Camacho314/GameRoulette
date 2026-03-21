@@ -42,7 +42,15 @@ struct SteamGamesView: View {
                     }
                 }
             }
-
+            .toolbar {
+                ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    NavigationLink(destination: LibraryView()) {
+                        Image(systemName: "books.vertical")
+                            .font(.title2)
+                    }
+                }
+            }
+            
             .navigationTitle("Steam Games (\(filteredGames.count))")
 
             .searchable(text: $searchText, prompt: "Search Steam games")

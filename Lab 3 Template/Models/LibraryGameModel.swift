@@ -11,6 +11,7 @@ class LibraryGame: Codable, Identifiable, ObservableObject {
     let title: String?
     let genres: [String]?
     let categories: [String]?
+    let contentDescriptors: String?
     var priority: String?
     let description: String?
     let headerImage: String?
@@ -18,11 +19,12 @@ class LibraryGame: Codable, Identifiable, ObservableObject {
     var screenshots: [String]?
     var inLibrary: Bool
 
-    init(id: Int, title: String?, genres: [String]?, categories: [String]?, priority: String?, description: String?, headerImage: String?, developers: [String]?, screenshots: [String]?, inLibrary: Bool) {
+    init(id: Int, title: String?, genres: [String]?, categories: [String]?, contentDescriptors: String?, priority: String?, description: String?, headerImage: String?, developers: [String]?, screenshots: [String]?, inLibrary: Bool) {
         self.id = id
         self.title = title
         self.genres = genres
         self.categories = categories
+        self.contentDescriptors = contentDescriptors
         self.priority = priority
         self.description = description
         self.headerImage = headerImage
