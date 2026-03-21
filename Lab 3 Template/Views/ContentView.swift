@@ -20,15 +20,32 @@ struct SteamGamesView: View {
                 } else if let error = errorMessage {
                     Text("Error: \(error)").foregroundColor(.red).padding()
                 } else {
-                    List(detailedGames) { game in
+                    List(AppManager.allGames) { game in
                         NavigationLink(game.title ?? "Unknown Title") {
                             GameDetailView(game: game)
                         }
                     }
                 }
             }
-            .navigationTitle("Steam Games (\(detailedGames.count))")
+            .navigationTitle("Steam Games (\(AppManager.allGames.count))")
+            .toolbar {
+                ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    NavigationLink(destination: LibraryView()) {
+                        Image(systemName: "books.vertical")
+                            .font(.title2)
+                    }
+                    Button(action: {
+                        print("Search tapped — not implemented")
+                    }) {
+                        Image(systemName: "magnifyingglass")
+                            .font(.title2)
+                    }
+                }
+            }
             .task {
+                
+                guard AppManager.allGames.isEmpty else { return }
+                
                 isLoading = true
                 do {
                     // Fetch all basic Steam games
@@ -36,20 +53,26 @@ struct SteamGamesView: View {
                     
                     var tempDetailed: [LibraryGame] = []
                     
-                    for game in initGames.prefix(200) {
+                    for (index, game) in initGames.prefix(500).enumerated() {
                         do {
+                            print("Fetching details for appid \(game.id) (\(index + 1)/500)...")
+                            
+                            // fetch details
                             if let details = try await SteamService.shared.fetchGameDetails(appid: game.id) {
                                 tempDetailed.append(details)
+                                print("✅ Fetched: \(details.title ?? "Unknown Title")")
                             } else {
-                                print("Skipping appid \(game.id) — no details returned")
+                                // success: false returned from Steam API
+                                print("⚠️ Skipping appid \(game.id) — no details returned")
                             }
+                            
                         } catch {
-                            print("Error fetching details for appid \(game.id): \(error)")
+                            // network, JSON decoding, or other errors
+                            print("❌ Error fetching appid \(game.id): \(error.localizedDescription)")
                         }
                     }
                     
-                    // Assign safely to state
-                    detailedGames = tempDetailed
+                    AppManager.allGames = tempDetailed
                     
                 } catch {
                     errorMessage = error.localizedDescription

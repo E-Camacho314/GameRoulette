@@ -48,29 +48,40 @@ class SteamService {
         return response.response.apps.filter { !$0.name.isEmpty }
     }
     
-    func fetchGameDetails(appid: Int) async throws -> LibraryGame? {
+    func fetchGameDetails(appid: Int) async -> LibraryGame? {
         let url = URL(string: "https://store.steampowered.com/api/appdetails?appids=\(appid)")!
-        let (data, _) = try await URLSession.shared.data(from: url)
         
-        print("Fetching details for appid \(appid):")
-        print(String(data: data, encoding: .utf8) ?? "Unable to decode JSON")
-        
-        let decoded = try JSONDecoder().decode([String: GameDetailsWrapper].self, from: data)
-        
-        guard let wrapper = decoded["\(appid)"], wrapper.success, let details = wrapper.data else {
-            print("No details for appid \(appid), skipping.")
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            
+            // Quick check for HTML (starts with "<")
+            if let firstChar = String(data: data, encoding: .utf8)?.first, firstChar == "<" {
+                print("Skipping appid \(appid) — received HTML instead of JSON")
+                return nil
+            }
+            
+            let decoded = try JSONDecoder().decode(GameDetailsResponse.self, from: data)
+            guard let wrapper = decoded["\(appid)"], wrapper.success else {
+                print("Skipping appid \(appid) — success flag false")
+                return nil
+            }
+            
+            let details = wrapper.data
+            
+            return LibraryGame(
+                id: appid,
+                title: details?.name,
+                genre: details?.genres?.first?.description,
+                priority: "None",
+                description: details?.short_description,
+                headerImage: details?.header_image,
+                developers: details?.developers,
+                inLibrary: false
+            )
+            
+        } catch {
+            print("Skipping appid \(appid) — decoding failed: \(error)")
             return nil
         }
-        
-        return LibraryGame(
-            id: appid,
-            title: details.name,
-            genre: details.genres?.first?.description,
-            priority: "",
-            description: details.short_description,
-            headerImage: details.header_image,
-            developers: details.developers,
-            inLibrary: false
-        )
     }
 }
