@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		A0C2E5B72F6A0CFE00AEB654 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = A0C2E5B62F6A0CFE00AEB654 /* FirebaseCore */; };
+		A0C2E64F2F6F58D000AEB654 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = A0C2E64E2F6F58D000AEB654 /* FirebaseDatabase */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,6 +47,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A0C2E64F2F6F58D000AEB654 /* FirebaseDatabase in Frameworks */,
 				A0C2E5B72F6A0CFE00AEB654 /* FirebaseCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -114,6 +116,7 @@
 			name = "Lab 3 Template";
 			packageProductDependencies = (
 				A0C2E5B62F6A0CFE00AEB654 /* FirebaseCore */,
+				A0C2E64E2F6F58D000AEB654 /* FirebaseDatabase */,
 			);
 			productName = "Lab 3 Template";
 			productReference = 6AD01A242E52542E005155A8 /* Lab 3 Template.app */;
@@ -580,6 +583,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A0C2E5B42F69FD5B00AEB654 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseCore;
+		};
+		A0C2E64E2F6F58D000AEB654 /* FirebaseDatabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A0C2E5B42F69FD5B00AEB654 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseDatabase;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
