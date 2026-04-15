@@ -5,6 +5,7 @@
 //  Created by Erik Camacho on 3/21/26.
 //
 import Foundation
+import SwiftUI
 
 @MainActor
 class SteamGamesViewModel: ObservableObject {
@@ -32,6 +33,29 @@ class SteamGamesViewModel: ObservableObject {
             errorMessage = error.localizedDescription
         }
         
+        isLoading = false
+    }
+    
+    func loadMyGames() async {
+        isLoading = true
+        errorMessage = nil
+
+        do {
+            let fetched: [SteamGame] = try await SteamService.shared.fetchMyGames()
+            var newLibrary: [LibraryGame] = []
+            for game in fetched {
+                let appID = game.id
+                if let details = try await SteamService.shared.fetchGameDetails(appid: appID) {
+                    newLibrary.append(details)
+                }
+            }
+            LibraryManager.shared.userLibrary = newLibrary
+            games = fetched
+
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+
         isLoading = false
     }
 }
