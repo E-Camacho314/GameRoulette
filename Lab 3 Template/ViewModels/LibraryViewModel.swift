@@ -15,3 +15,16 @@ func priorityColor(_ priority: String?) -> Color {
     default: return .gray
     }
 }
+
+func priorityColor(_ priority: String, theme: any Theme) -> Color {
+    switch priority.lowercased() {
+    case "high":
+        return theme.errorColor
+    case "medium":
+        return theme.warningColor
+    case "low":
+        return theme.successColor
+    default:
+        return theme.secondaryColor
+    }
+}

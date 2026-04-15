@@ -44,7 +44,6 @@ struct GameDetailLoaderView: View {
     
     func loadGame() async {
         
-        // check cache first
         if let cached = AppManager.gameCache[appid] {
             game = cached
             isLoading = false

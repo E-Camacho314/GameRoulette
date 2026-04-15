@@ -11,6 +11,7 @@ import MapKit
 struct GameDetailView: View {
     @StateObject private var libraryManager = LibraryManager.shared
     @State var game: LibraryGame
+    @Environment(\.theme) var theme
     
     let priorities = ["High", "Medium", "Low"]
     
@@ -22,6 +23,7 @@ struct GameDetailView: View {
                         switch phase {
                         case .empty:
                             ProgressView()
+                                .tint(theme.primaryColor)
                                 .frame(height: 200)
                         case .success(let image):
                             image
@@ -35,65 +37,95 @@ struct GameDetailView: View {
                                 .resizable()
                                 .scaledToFit()
                                 .frame(height: 200)
+                                .foregroundColor(theme.secondaryTextColor)
                         @unknown default:
                             EmptyView()
                         }
                     }
                 }
 
-                Text(game.title  ?? "Unknown Title")
+                Text(game.title ?? "Unknown Title")
                     .font(.largeTitle)
                     .fontWeight(.bold)
-
+                    .foregroundColor(theme.textColor)
+                    .multilineTextAlignment(.center)
                 
                 if let priority = game.priority {
                     Text("Current priority: \(priority)")
                         .fontWeight(.bold)
                         .foregroundColor(.white)
                         .padding(8)
-                        .background(Lab_3_Template.priorityColor(priority))
+                        .background(priorityColor(priority, theme: theme))
                         .cornerRadius(8)
                 }
                 
                 Text(game.genres?.joined(separator: ", ") ?? "Unknown Genre")
                     .font(.body)
                     .multilineTextAlignment(.center)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(theme.secondaryTextColor)
                     .padding(.horizontal)
                 
                 Text(game.categories?.joined(separator: ", ") ?? "Unknown Category")
                     .font(.body)
                     .multilineTextAlignment(.center)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(theme.secondaryTextColor)
                     .padding(.horizontal)
 
                 Text(game.description ?? "No description available")
                     .font(.body)
                     .multilineTextAlignment(.center)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(theme.secondaryTextColor)
                     .padding(.horizontal)
                 
-                ScrollView(.horizontal) {
-                    HStack {
-                        ForEach(game.screenshots ?? [], id: \.self) { url in
-                            AsyncImage(url: URL(string: url)) { image in
-                                image
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(height: 150)
-                                    .cornerRadius(10)
-                            } placeholder: {
-                                ProgressView()
+                if let screenshots = game.screenshots, !screenshots.isEmpty {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Screenshots")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                            .foregroundColor(theme.textColor)
+                            .padding(.horizontal)
+                        
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 12) {
+                                ForEach(screenshots, id: \.self) { url in
+                                    AsyncImage(url: URL(string: url)) { phase in
+                                        switch phase {
+                                        case .empty:
+                                            RoundedRectangle(cornerRadius: 10)
+                                                .fill(theme.secondaryBackgroundColor)
+                                                .frame(width: 250, height: 150)
+                                                .overlay(ProgressView())
+                                        case .success(let image):
+                                            image
+                                                .resizable()
+                                                .scaledToFit()
+                                                .frame(height: 150)
+                                                .cornerRadius(10)
+                                        case .failure:
+                                            RoundedRectangle(cornerRadius: 10)
+                                                .fill(theme.secondaryBackgroundColor)
+                                                .frame(width: 250, height: 150)
+                                                .overlay(
+                                                    Image(systemName: "photo")
+                                                        .foregroundColor(theme.secondaryTextColor)
+                                                )
+                                        @unknown default:
+                                            EmptyView()
+                                        }
+                                    }
+                                }
                             }
+                            .padding(.horizontal)
                         }
                     }
                 }
                 
-                if let notes = game.contentDescriptors {
+                if let notes = game.contentDescriptors, !notes.isEmpty {
                     Text(notes)
                         .font(.caption)
-                        .foregroundColor(.red)
+                        .foregroundColor(theme.warningColor)
                         .padding(.horizontal)
+                        .multilineTextAlignment(.center)
                 }
                 
                 if game.inLibrary {
@@ -108,6 +140,7 @@ struct GameDetailView: View {
                         }
                         .pickerStyle(SegmentedPickerStyle())
                         .padding(.horizontal)
+                        .tint(theme.primaryColor)
                         
                         Button(action: {
                             game.priority = "Complete"
@@ -117,12 +150,13 @@ struct GameDetailView: View {
                                 .foregroundColor(.white)
                                 .padding()
                                 .frame(maxWidth: .infinity)
-                                .background(Color.blue)
+                                .background(theme.successColor)
                                 .cornerRadius(10)
                                 .padding(.horizontal)
                         }
                     }
                 }
+                
                 Button(action: {
                     game.inLibrary.toggle()
                     
@@ -134,19 +168,20 @@ struct GameDetailView: View {
                         libraryManager.userLibrary.removeAll { $0.id == game.id }
                     }
                 }) {
-                    Text(game.inLibrary ? "Delete from Library" : "Add to Library")
+                    Text(game.inLibrary ? "Remove from Library" : "Add to Library")
                         .fontWeight(.bold)
                         .foregroundColor(.white)
                         .padding()
                         .frame(maxWidth: .infinity)
-                        .background(game.inLibrary ? Color.red : Color.green)
+                        .background(game.inLibrary ? theme.errorColor : theme.successColor)
                         .cornerRadius(10)
                         .padding(.horizontal)
                 }
             }
             .padding()
         }
+        .background(theme.backgroundColor)
         .navigationTitle("Game Details")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
-

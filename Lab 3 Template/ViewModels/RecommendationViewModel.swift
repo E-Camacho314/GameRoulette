@@ -8,15 +8,11 @@ import Foundation
 @MainActor
 final class RecommendationViewModel: ObservableObject {
 
-    /// Random picks from the user’s library (used when `userLibrary` is non-empty).
     @Published private(set) var libraryPicks: [LibraryGame] = []
-    /// Random picks from the Steam catalog (used only when the library is empty).
     @Published private(set) var catalogPicks: [SteamGame] = []
     @Published private(set) var isLoading = false
     @Published var errorMessage: String?
 
-    /// - If `userLibrary` has games: random sample from the library (no Steam list fetch).
-    /// - If empty: random games from the Steam `GetAppList` catalog.
     func refreshPicks(count: Int = 5, userLibrary: [LibraryGame]) async {
         errorMessage = nil
 
