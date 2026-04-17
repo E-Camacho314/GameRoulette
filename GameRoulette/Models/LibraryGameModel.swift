@@ -41,7 +41,7 @@ class LibraryManager: ObservableObject {
     private init() {}
 
     private var userID: String {
-        UserDefaults.standard.string(forKey: "userSteamID") ?? Secrets.steamID
+        UserDefaults.standard.string(forKey: "userSteamID") ?? ""
     }
 
     @MainActor
@@ -63,8 +63,6 @@ class LibraryManager: ObservableObject {
     @MainActor
     func updatePriority(for game: LibraryGame, priority: String) async {
         game.priority = priority
-        // LibraryGame is a class (reference type), so reassigning the element
-        // triggers the @Published publisher and re-renders dependent views
         if let idx = userLibrary.firstIndex(where: { $0.id == game.id }) {
             userLibrary[idx] = game
         }

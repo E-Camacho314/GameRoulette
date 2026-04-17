@@ -66,61 +66,66 @@ typealias GameDetailsResponse = [String: GameDetailsWrapper]
 class SteamService {
     static let shared = SteamService()
 
+    private func backendURL(path: String, queryItems: [URLQueryItem] = []) -> URL {
+        var comps = URLComponents(string: BackendService.baseURL + path)!
+        if !queryItems.isEmpty {
+            comps.queryItems = queryItems
+        }
+        return comps.url!
+    }
+
     func fetchAllGames() async throws -> [SteamGame] {
-        let key = Secrets.steamAPIKey
-        let url = URL(string: "https://api.steampowered.com/IStoreService/GetAppList/v1/?key=" + key /*+ "&last_appid=1537570&max_results=50000""&max_results=50000"*/)!
-        let (data, _) = try await URLSession.shared.data(from: url)
-        let response = try JSONDecoder().decode(AllGamesResponse.self, from: data)
-        return response.response.apps.filter { !$0.name.isEmpty }
+        let url = backendURL(path: "/steam/apps")
+        let (data, urlResponse) = try await URLSession.shared.data(from: url)
+        guard let http = urlResponse as? HTTPURLResponse, http.statusCode == 200 else {
+            throw BackendError.badStatus((urlResponse as? HTTPURLResponse)?.statusCode ?? 0)
+        }
+        let decoded = try JSONDecoder().decode(AllGamesResponse.self, from: data)
+        return decoded.response.apps.filter { !$0.name.isEmpty }
     }
-    
-    
-    func fetchMyGames() async throws -> [SteamGame] {
-        let key = Secrets.steamAPIKey
-        let steamID = Secrets.steamID
-        let url = URL(string: "https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=" + key + "&steamid=" + steamID + "&include_appinfo=true&include_played_free_games=true")!
-        let (data, _) = try await URLSession.shared.data(from: url)
-        let response = try JSONDecoder().decode(OwnedGamesResponse.self, from: data)
-        return response.response.games.filter { !$0.name.isEmpty }
+
+    func fetchMyGames(steamID: String) async throws -> [SteamGame] {
+        let url = backendURL(path: "/steam/owned", queryItems: [URLQueryItem(name: "steamID", value: steamID)])
+        let (data, response) = try await URLSession.shared.data(from: url)
+        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
+            throw BackendError.badStatus((response as? HTTPURLResponse)?.statusCode ?? 0)
+        }
+        let decoded = try JSONDecoder().decode(OwnedGamesResponse.self, from: data)
+        return decoded.response.games.filter { !$0.name.isEmpty }
     }
-    
-    func fetchGameDetails(appid: Int) async -> LibraryGame? {
-        let url = URL(string: "https://store.steampowered.com/api/appdetails?appids=\(appid)")!
-        
-        do {
-            let (data, _) = try await URLSession.shared.data(from: url)
-            
-            if let firstChar = String(data: data, encoding: .utf8)?.first, firstChar == "<" {
-                print("Skipping appid \(appid) — received HTML instead of JSON")
-                return nil
-            }
-            
-            let decoded = try JSONDecoder().decode(GameDetailsResponse.self, from: data)
-            guard let wrapper = decoded["\(appid)"], wrapper.success else {
-                print("Skipping appid \(appid) — success flag false")
-                return nil
-            }
-            
-            let details = wrapper.data
-            
-            return LibraryGame(
-                id: appid,
-                title: details?.name,
-                genres: details?.genres?.map { $0.description },
-                categories: details?.categories?.map { $0.description },
-                contentDescriptors: details?.content_descriptors?.notes,
-                priority: "None",
-                description: details?.short_description,
-                headerImage: details?.header_image,
-                developers: details?.developers,
-                screenshots: details?.screenshots?.map { $0.path_full },
-                
-                inLibrary: false
-            )
-            
-        } catch {
-            print("Skipping appid \(appid) — decoding failed: \(error)")
+
+    func fetchGameDetails(appid: Int) async throws -> LibraryGame? {
+        let url = backendURL(path: "/steam/appdetails", queryItems: [URLQueryItem(name: "appids", value: String(appid))])
+        let (data, response) = try await URLSession.shared.data(from: url)
+        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
+            throw BackendError.badStatus((response as? HTTPURLResponse)?.statusCode ?? 0)
+        }
+
+        if let firstChar = String(data: data, encoding: .utf8)?.first, firstChar == "<" {
+            print("Skipping appid \(appid) — received HTML instead of JSON")
             return nil
         }
+
+        let decoded = try JSONDecoder().decode(GameDetailsResponse.self, from: data)
+        guard let wrapper = decoded["\(appid)"], wrapper.success else {
+            print("Skipping appid \(appid) — success flag false")
+            return nil
+        }
+
+        let details = wrapper.data
+
+        return LibraryGame(
+            id: appid,
+            title: details?.name,
+            genres: details?.genres?.map { $0.description },
+            categories: details?.categories?.map { $0.description },
+            contentDescriptors: details?.content_descriptors?.notes,
+            priority: "None",
+            description: details?.short_description,
+            headerImage: details?.header_image,
+            developers: details?.developers,
+            screenshots: details?.screenshots?.map { $0.path_full },
+            inLibrary: false
+        )
     }
 }

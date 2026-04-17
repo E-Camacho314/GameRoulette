@@ -2,5 +2,9 @@ GoogleService-Info.plist
 **/GoogleService-Info.plist
 Secrets.swift
 **/Secrets.swift
+backend/firebase-service-account.json
+backend/gameroulette-backend
+backend/.env
+backend/compose.env
 
 

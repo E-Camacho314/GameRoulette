@@ -133,9 +133,13 @@ struct GameCard: View {
         }
         
         // Fetch details
-        if let details = await SteamService.shared.fetchGameDetails(appid: game.id) {
-            gameDetails = details
-            AppManager.gameCache[game.id] = details
+        do {
+            if let details = try await SteamService.shared.fetchGameDetails(appid: game.id) {
+                gameDetails = details
+                AppManager.gameCache[game.id] = details
+            }
+        } catch {
+            print("Failed to load details for \(game.id): \(error)")
         }
         isLoading = false
     }
