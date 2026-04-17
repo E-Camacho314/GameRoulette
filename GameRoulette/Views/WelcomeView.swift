@@ -150,22 +150,11 @@ struct WelcomeView: View {
         }
         
         let savedSteamID = UserDefaults.standard.string(forKey: "userSteamID")
-        let secretsSteamID = Secrets.steamID
-        
-        var validSteamID: String?
-        
-        // Check UserDefaults first
-        if let savedID = savedSteamID, !savedID.isEmpty {
-            validSteamID = savedID
-        }
-        // Then check Secrets
-        else if !secretsSteamID.isEmpty && secretsSteamID != "" && secretsSteamID != "" {
-            validSteamID = secretsSteamID
-        }
+        let validSteamID = (savedSteamID?.isEmpty == false) ? savedSteamID : nil
         
         if let steamID = validSteamID {
             do {
-                let ownedGames = try await SteamService.shared.fetchMyGames()
+                let ownedGames = try await SteamService.shared.fetchMyGames(steamID: steamID)
                 
                 if ownedGames.isEmpty {
                     await MainActor.run {
@@ -177,9 +166,9 @@ struct WelcomeView: View {
                 }
                 
                 // Fetch details and sync all owned games to the backend
-                let userID = UserDefaults.standard.string(forKey: "userSteamID") ?? Secrets.steamID
+                let userID = steamID
                 for game in ownedGames {
-                    if let details = await SteamService.shared.fetchGameDetails(appid: game.id) {
+                    if let details = try await SteamService.shared.fetchGameDetails(appid: game.id) {
                         details.inLibrary = true
                         AppManager.gameCache[game.id] = details
                         try? await BackendService.addGame(details, userID: userID)
@@ -441,19 +430,18 @@ struct LoginView: View {
         isLoading = true
         
         Task {
-            // Save Steam ID
-            Secrets.steamID = steamIDInput
+            // Save Steam ID locally for this app user
             UserDefaults.standard.set(steamIDInput, forKey: "userSteamID")
             
             // Attempt to load library
             let libraryManager = LibraryManager.shared
             do {
-                let ownedGames = try await SteamService.shared.fetchMyGames()
+                let ownedGames = try await SteamService.shared.fetchMyGames(steamID: steamIDInput)
                 
                 // Fetch details and sync all owned games to the backend
                 let userID = steamIDInput
                 for game in ownedGames {
-                    if let details = await SteamService.shared.fetchGameDetails(appid: game.id) {
+                    if let details = try await SteamService.shared.fetchGameDetails(appid: game.id) {
                         AppManager.gameCache[game.id] = details
                         try? await BackendService.addGame(details, userID: userID)
                     }

@@ -232,9 +232,15 @@ struct CatalogGameCard: View {
         .task {
             if let cached = AppManager.gameCache[game.id] {
                 gameDetails = cached
-            } else if let details = await SteamService.shared.fetchGameDetails(appid: game.id) {
-                gameDetails = details
-                AppManager.gameCache[game.id] = details
+            } else {
+                do {
+                    if let details = try await SteamService.shared.fetchGameDetails(appid: game.id) {
+                        gameDetails = details
+                        AppManager.gameCache[game.id] = details
+                    }
+                } catch {
+                    print("Failed to load recommendation details for \(game.id): \(error)")
+                }
             }
         }
     }

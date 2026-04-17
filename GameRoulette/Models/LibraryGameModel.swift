@@ -41,7 +41,7 @@ class LibraryManager: ObservableObject {
     private init() {}
 
     private var userID: String {
-        UserDefaults.standard.string(forKey: "userSteamID") ?? Secrets.steamID
+        UserDefaults.standard.string(forKey: "userSteamID") ?? ""
     }
 
     @MainActor

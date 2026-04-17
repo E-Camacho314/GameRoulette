@@ -10,11 +10,18 @@ enum BackendError: Error {
 }
 
 enum BackendService {
-    #if DEBUG
-    static let baseURL = "http://localhost:8080"
-    #else
-    static let baseURL = "https://<your-render-or-fly-url>"
-    #endif
+    static var baseURL: String {
+        if let configured = Bundle.main.object(forInfoDictionaryKey: "BACKEND_BASE_URL") as? String,
+           !configured.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return configured
+        }
+
+        #if DEBUG
+        return "http://localhost:8080"
+        #else
+        fatalError("Set BACKEND_BASE_URL in Info.plist for non-debug builds.")
+        #endif
+    }
 
     // MARK: - Private DTO matching Go's LibraryGame struct exactly
     // All fields except id/inLibrary are optional to handle null values from Firestore

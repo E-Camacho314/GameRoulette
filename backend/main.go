@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"cloud.google.com/go/firestore"
 	firebase "firebase.google.com/go/v4"
@@ -79,6 +80,31 @@ func (a *App) steamAllApps(w http.ResponseWriter, r *http.Request) {
 	}
 	defer resp.Body.Close()
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(resp.StatusCode)
+	io.Copy(w, resp.Body)
+}
+
+func (a *App) steamOwnedGames(w http.ResponseWriter, r *http.Request) {
+	if a.SteamKey == "" {
+		http.Error(w, "STEAM_API_KEY not configured", http.StatusServiceUnavailable)
+		return
+	}
+
+	steamID := strings.TrimSpace(r.URL.Query().Get("steamID"))
+	if steamID == "" {
+		http.Error(w, "steamID required", http.StatusBadRequest)
+		return
+	}
+
+	upstream := fmt.Sprintf("%s/IPlayerService/GetOwnedGames/v1/?key=%s&steamid=%s&include_appinfo=true&include_played_free_games=true", steamAPIBase, a.SteamKey, steamID)
+	resp, err := http.Get(upstream)
+	if err != nil {
+		http.Error(w, "steam request failed", http.StatusBadGateway)
+		return
+	}
+	defer resp.Body.Close()
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(resp.StatusCode)
 	io.Copy(w, resp.Body)
 }
 
@@ -191,12 +217,22 @@ func loggingMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+func (a *App) health(w http.ResponseWriter, r *http.Request) {
+	writeJSON(w, http.StatusOK, map[string]any{
+		"ok":      true,
+		"service": "gameroulette-backend",
+	})
+}
+
 func (a *App) routes() http.Handler {
 	mux := http.NewServeMux()
+
+	mux.HandleFunc("GET /health", a.health)
 
 	// Steam proxy
 	mux.HandleFunc("GET /steam/apps", a.steamAllApps)
 	mux.HandleFunc("GET /steam/appdetails", a.steamAppDetails)
+	mux.HandleFunc("GET /steam/owned", a.steamOwnedGames)
 
 	// Library CRUD
 	mux.HandleFunc("GET /library", a.getLibrary)
@@ -207,6 +243,18 @@ func (a *App) routes() http.Handler {
 	return loggingMiddleware(mux)
 }
 
+func firebaseOptionFromEnv() (option.ClientOption, error) {
+	if credsFile := strings.TrimSpace(os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")); credsFile != "" {
+		return option.WithCredentialsFile(credsFile), nil
+	}
+
+	if credsJSON := strings.TrimSpace(os.Getenv("FIREBASE_CREDENTIALS")); credsJSON != "" {
+		return option.WithCredentialsJSON([]byte(credsJSON)), nil
+	}
+
+	return nil, fmt.Errorf("set GOOGLE_APPLICATION_CREDENTIALS or FIREBASE_CREDENTIALS")
+}
+
 func main() {
 	ctx := context.Background()
 
@@ -215,12 +263,10 @@ func main() {
 		log.Println("Warning: STEAM_API_KEY not set; /steam/apps will return 503")
 	}
 
-	// Load Firebase credentials from env var — required for deployment on Render/Fly.io
-	credsJSON := os.Getenv("FIREBASE_CREDENTIALS")
-	if credsJSON == "" {
-		log.Fatal("FIREBASE_CREDENTIALS env var not set")
+	opt, err := firebaseOptionFromEnv()
+	if err != nil {
+		log.Fatal(err)
 	}
-	opt := option.WithCredentialsJSON([]byte(credsJSON))
 
 	fbApp, err := firebase.NewApp(ctx, &firebase.Config{ProjectID: "gameroulette-c920a"}, opt)
 	if err != nil {

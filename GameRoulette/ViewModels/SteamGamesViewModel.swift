@@ -41,7 +41,13 @@ class SteamGamesViewModel: ObservableObject {
         errorMessage = nil
 
         do {
-            let fetched: [SteamGame] = try await SteamService.shared.fetchMyGames()
+            guard let steamID = UserDefaults.standard.string(forKey: "userSteamID"), !steamID.isEmpty else {
+                errorMessage = "Steam ID not set"
+                isLoading = false
+                return
+            }
+
+            let fetched: [SteamGame] = try await SteamService.shared.fetchMyGames(steamID: steamID)
             var newLibrary: [LibraryGame] = []
             for game in fetched {
                 let appID = game.id
