@@ -5,8 +5,15 @@
 
 import Foundation
 
-enum BackendError: Error {
+enum BackendError: Error, LocalizedError {
     case badStatus(Int)
+
+    var errorDescription: String? {
+        switch self {
+        case .badStatus(let code):
+            return "Backend returned HTTP \(code)"
+        }
+    }
 }
 
 enum BackendService {
@@ -17,7 +24,7 @@ enum BackendService {
         }
 
         #if DEBUG
-        return "http://localhost:8080"
+        return "https://pic-burton-podcast-convenient.trycloudflare.com"
         #else
         fatalError("Set BACKEND_BASE_URL in Info.plist for non-debug builds.")
         #endif

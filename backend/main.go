@@ -62,6 +62,12 @@ func (a *App) steamAppDetails(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		log.Printf("Steam appdetails returned %d: %s", resp.StatusCode, string(body))
+		http.Error(w, fmt.Sprintf("Steam API error: %d", resp.StatusCode), http.StatusBadGateway)
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	io.Copy(w, resp.Body)
 }
@@ -71,7 +77,6 @@ func (a *App) steamAllApps(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "STEAM_API_KEY not configured", http.StatusServiceUnavailable)
 		return
 	}
-	// Key intentionally kept out of log output
 	upstream := fmt.Sprintf("%s/IStoreService/GetAppList/v1/?key=%s", steamAPIBase, a.SteamKey)
 	resp, err := http.Get(upstream)
 	if err != nil {
@@ -79,8 +84,13 @@ func (a *App) steamAllApps(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		log.Printf("Steam GetAppList returned %d: %s", resp.StatusCode, string(body))
+		http.Error(w, fmt.Sprintf("Steam API error: %d", resp.StatusCode), http.StatusBadGateway)
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(resp.StatusCode)
 	io.Copy(w, resp.Body)
 }
 
@@ -103,8 +113,13 @@ func (a *App) steamOwnedGames(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		log.Printf("Steam GetOwnedGames returned %d: %s", resp.StatusCode, string(body))
+		http.Error(w, fmt.Sprintf("Steam API error: %d", resp.StatusCode), http.StatusBadGateway)
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(resp.StatusCode)
 	io.Copy(w, resp.Body)
 }
 

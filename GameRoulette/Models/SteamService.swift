@@ -76,12 +76,12 @@ class SteamService {
 
     func fetchAllGames() async throws -> [SteamGame] {
         let url = backendURL(path: "/steam/apps")
-        let (data, response) = try await URLSession.shared.data(from: url)
-        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
-            throw BackendError.badStatus((response as? HTTPURLResponse)?.statusCode ?? 0)
+        let (data, urlResponse) = try await URLSession.shared.data(from: url)
+        guard let http = urlResponse as? HTTPURLResponse, http.statusCode == 200 else {
+            throw BackendError.badStatus((urlResponse as? HTTPURLResponse)?.statusCode ?? 0)
         }
-        let response = try JSONDecoder().decode(AllGamesResponse.self, from: data)
-        return response.response.apps.filter { !$0.name.isEmpty }
+        let decoded = try JSONDecoder().decode(AllGamesResponse.self, from: data)
+        return decoded.response.apps.filter { !$0.name.isEmpty }
     }
 
     func fetchMyGames(steamID: String) async throws -> [SteamGame] {
@@ -90,8 +90,8 @@ class SteamService {
         guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
             throw BackendError.badStatus((response as? HTTPURLResponse)?.statusCode ?? 0)
         }
-        let response = try JSONDecoder().decode(OwnedGamesResponse.self, from: data)
-        return response.response.games.filter { !$0.name.isEmpty }
+        let decoded = try JSONDecoder().decode(OwnedGamesResponse.self, from: data)
+        return decoded.response.games.filter { !$0.name.isEmpty }
     }
 
     func fetchGameDetails(appid: Int) async throws -> LibraryGame? {
