@@ -68,7 +68,7 @@ class SteamService {
 
     func fetchAllGames() async throws -> [SteamGame] {
         let url = URL(string: BackendService.baseURL + "/steam/apps")!
-        let (data, _) = try await URLSession.shared.data(from: url)
+        let (data, _) = try await URLSession.shared.data(for: BackendService.makeRequest(url))
         let response = try JSONDecoder().decode(AllGamesResponse.self, from: data)
         return response.response.apps.filter { !$0.name.isEmpty }
     }
@@ -76,16 +76,16 @@ class SteamService {
     func fetchMyGames() async throws -> [SteamGame] {
         let steamID = UserDefaults.standard.string(forKey: "userSteamID") ?? Secrets.steamID
         let url = URL(string: BackendService.baseURL + "/steam/mygames?steamID=" + steamID)!
-        let (data, _) = try await URLSession.shared.data(from: url)
+        let (data, _) = try await URLSession.shared.data(for: BackendService.makeRequest(url))
         let response = try JSONDecoder().decode(OwnedGamesResponse.self, from: data)
         return response.response.games.filter { !$0.name.isEmpty }
     }
 
     func fetchGameDetails(appid: Int) async -> LibraryGame? {
         let url = URL(string: BackendService.baseURL + "/steam/appdetails?appids=\(appid)")!
-        
+
         do {
-            let (data, _) = try await URLSession.shared.data(from: url)
+            let (data, _) = try await URLSession.shared.data(for: BackendService.makeRequest(url))
             
             if let firstChar = String(data: data, encoding: .utf8)?.first, firstChar == "<" {
                 print("Skipping appid \(appid) — received HTML instead of JSON")

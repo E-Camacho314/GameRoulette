@@ -67,10 +67,14 @@ enum BackendService {
 
     // MARK: - Private helpers
 
-    private static func makeRequest(_ url: URL, method: String = "GET") -> URLRequest {
+    private static var apiKey: String {
+        Bundle.main.object(forInfoDictionaryKey: "BACKEND_API_KEY") as? String ?? ""
+    }
+
+    static func makeRequest(_ url: URL, method: String = "GET") -> URLRequest {
         var req = URLRequest(url: url)
         req.httpMethod = method
-        req.setValue(Secrets.apiKey, forHTTPHeaderField: "X-API-Key")
+        req.setValue(apiKey, forHTTPHeaderField: "X-API-Key")
         return req
     }
 
