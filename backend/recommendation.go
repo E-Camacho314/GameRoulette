@@ -1,14 +1,13 @@
 package main
 
 import (
-	"log"
 	"math"
 	"math/rand"
 	"net/http"
 	"sort"
 )
 
-const mmrLambda = 0.7
+const mmrLambda = 0.55
 
 func priorityBoost(p string) float64 {
 	switch p {
@@ -46,20 +45,10 @@ func (a *App) recommend(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	docs, err := a.Firestore.Collection("users").Doc(userID).Collection("library").Documents(r.Context()).GetAll()
+	all, err := a.fetchLibrary(r.Context(), userID)
 	if err != nil {
 		http.Error(w, "failed to fetch library", http.StatusInternalServerError)
 		return
-	}
-
-	var all []LibraryGame
-	for _, doc := range docs {
-		var g LibraryGame
-		if err := doc.DataTo(&g); err != nil {
-			log.Printf("skipping doc %s: %v", doc.Ref.ID, err)
-			continue
-		}
-		all = append(all, g)
 	}
 
 	candidates := make([]LibraryGame, 0, len(all))

@@ -9,9 +9,12 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
+	"time"
 
 	"cloud.google.com/go/firestore"
 	firebase "firebase.google.com/go/v4"
+	"golang.org/x/sync/singleflight"
 	"google.golang.org/api/option"
 )
 type LibraryGame struct {
@@ -28,10 +31,57 @@ type LibraryGame struct {
 	InLibrary bool `json:"inLibrary" firestore:"inLibrary"`
 }
 
+type cachedLibrary struct {
+	games   []LibraryGame
+	expires time.Time
+}
+
+const libraryCacheTTL = 60 * time.Second
+
 type App struct {
-	Firestore *firestore.Client
-	SteamKey  string
-	APIKey    string
+	Firestore    *firestore.Client
+	SteamKey     string
+	APIKey       string
+	libraryCache sync.Map
+	libraryGroup singleflight.Group
+}
+
+func (a *App) fetchLibrary(ctx context.Context, userID string) ([]LibraryGame, error) {
+	if v, ok := a.libraryCache.Load(userID); ok {
+		if entry := v.(cachedLibrary); time.Now().Before(entry.expires) {
+			return entry.games, nil
+		}
+	}
+	v, err, _ := a.libraryGroup.Do(userID, func() (any, error) {
+		if v, ok := a.libraryCache.Load(userID); ok {
+			if entry := v.(cachedLibrary); time.Now().Before(entry.expires) {
+				return entry.games, nil
+			}
+		}
+		docs, err := a.Firestore.Collection("users").Doc(userID).Collection("library").Documents(ctx).GetAll()
+		if err != nil {
+			return nil, err
+		}
+		var games []LibraryGame
+		for _, doc := range docs {
+			var g LibraryGame
+			if err := doc.DataTo(&g); err != nil {
+				log.Printf("skipping doc %s: %v", doc.Ref.ID, err)
+				continue
+			}
+			games = append(games, g)
+		}
+		a.libraryCache.Store(userID, cachedLibrary{games: games, expires: time.Now().Add(libraryCacheTTL)})
+		return games, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return v.([]LibraryGame), nil
+}
+
+func (a *App) invalidateLibraryCache(userID string) {
+	a.libraryCache.Delete(userID)
 }
 
 func writeJSON(w http.ResponseWriter, status int, v any) {
@@ -132,20 +182,10 @@ func (a *App) getLibrary(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	docs, err := a.Firestore.Collection("users").Doc(userID).Collection("library").Documents(r.Context()).GetAll()
+	games, err := a.fetchLibrary(r.Context(), userID)
 	if err != nil {
 		http.Error(w, "failed to fetch library", http.StatusInternalServerError)
 		return
-	}
-
-	games := make([]LibraryGame, 0, len(docs))
-	for _, doc := range docs {
-		var g LibraryGame
-		if err := doc.DataTo(&g); err != nil {
-			log.Printf("skipping doc %s: %v", doc.Ref.ID, err)
-			continue
-		}
-		games = append(games, g)
 	}
 	writeJSON(w, http.StatusOK, games)
 }
@@ -171,6 +211,7 @@ func (a *App) addGame(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "failed to save game", http.StatusInternalServerError)
 		return
 	}
+	a.invalidateLibraryCache(userID)
 	writeJSON(w, http.StatusCreated, game)
 }
 
@@ -187,6 +228,7 @@ func (a *App) removeGame(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "failed to delete game", http.StatusInternalServerError)
 		return
 	}
+	a.invalidateLibraryCache(userID)
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -213,6 +255,7 @@ func (a *App) updatePriority(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "failed to update priority", http.StatusInternalServerError)
 		return
 	}
+	a.invalidateLibraryCache(userID)
 	w.WriteHeader(http.StatusOK)
 }
 
