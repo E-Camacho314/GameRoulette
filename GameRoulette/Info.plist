@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>BACKEND_BASE_URL</key>
-	<string>https://pic-burton-podcast-convenient.trycloudflare.com</string>
+	<string>https://raspberrypi.tail3de235.ts.net</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsLocalNetworking</key>
@@ -11,5 +11,7 @@
 		<key>NSExceptionDomains</key>
 		<dict/>
 	</dict>
+	<key>BACKEND_API_KEY</key>
+	<string>2026-12345</string>
 </dict>
 </plist>

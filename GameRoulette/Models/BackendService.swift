@@ -24,10 +24,21 @@ enum BackendService {
         }
 
         #if DEBUG
-        return "https://pic-burton-podcast-convenient.trycloudflare.com"
+        return "https://raspberrypi.tail3de235.ts.net"
         #else
         fatalError("Set BACKEND_BASE_URL in Info.plist for non-debug builds.")
         #endif
+    }
+
+    static var apiKey: String {
+        Bundle.main.object(forInfoDictionaryKey: "BACKEND_API_KEY") as? String ?? ""
+    }
+
+    private static func request(_ url: URL, method: String = "GET") -> URLRequest {
+        var req = URLRequest(url: url)
+        req.httpMethod = method
+        req.setValue(apiKey, forHTTPHeaderField: "X-API-Key")
+        return req
     }
 
     // MARK: - Private DTO matching Go's LibraryGame struct exactly
@@ -85,7 +96,7 @@ enum BackendService {
     static func fetchLibrary(userID: String) async throws -> [LibraryGame] {
         var comps = URLComponents(string: baseURL + "/library")!
         comps.queryItems = [URLQueryItem(name: "userID", value: userID)]
-        let (data, resp) = try await URLSession.shared.data(from: comps.url!)
+        let (data, resp) = try await URLSession.shared.data(for: request(comps.url!))
         guard (resp as? HTTPURLResponse)?.statusCode == 200 else {
             throw BackendError.badStatus((resp as? HTTPURLResponse)?.statusCode ?? 0)
         }
@@ -97,8 +108,7 @@ enum BackendService {
     static func addGame(_ game: LibraryGame, userID: String) async throws {
         var comps = URLComponents(string: baseURL + "/library")!
         comps.queryItems = [URLQueryItem(name: "userID", value: userID)]
-        var req = URLRequest(url: comps.url!)
-        req.httpMethod = "POST"
+        var req = request(comps.url!, method: "POST")
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
         req.httpBody = try JSONEncoder().encode(BackendGame(from: game))
         let (_, resp) = try await URLSession.shared.data(for: req)
@@ -111,9 +121,7 @@ enum BackendService {
     static func removeGame(gameID: Int, userID: String) async throws {
         var comps = URLComponents(string: baseURL + "/library/\(gameID)")!
         comps.queryItems = [URLQueryItem(name: "userID", value: userID)]
-        var req = URLRequest(url: comps.url!)
-        req.httpMethod = "DELETE"
-        let (_, resp) = try await URLSession.shared.data(for: req)
+        let (_, resp) = try await URLSession.shared.data(for: request(comps.url!, method: "DELETE"))
         guard let code = (resp as? HTTPURLResponse)?.statusCode, code == 204 else {
             throw BackendError.badStatus((resp as? HTTPURLResponse)?.statusCode ?? 0)
         }
@@ -123,8 +131,7 @@ enum BackendService {
     static func updatePriority(gameID: Int, priority: String, userID: String) async throws {
         var comps = URLComponents(string: baseURL + "/library/\(gameID)")!
         comps.queryItems = [URLQueryItem(name: "userID", value: userID)]
-        var req = URLRequest(url: comps.url!)
-        req.httpMethod = "PATCH"
+        var req = request(comps.url!, method: "PATCH")
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
         req.httpBody = try JSONEncoder().encode(["priority": priority])
         let (_, resp) = try await URLSession.shared.data(for: req)

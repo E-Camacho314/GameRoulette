@@ -31,6 +31,7 @@ type LibraryGame struct {
 type App struct {
 	Firestore *firestore.Client
 	SteamKey  string
+	APIKey    string
 }
 
 func writeJSON(w http.ResponseWriter, status int, v any) {
@@ -232,6 +233,20 @@ func loggingMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+func (a *App) apiKeyMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/health" {
+			next.ServeHTTP(w, r)
+			return
+		}
+		if r.Header.Get("X-API-Key") != a.APIKey {
+			http.Error(w, "unauthorized", http.StatusUnauthorized)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
 func (a *App) health(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]any{
 		"ok":      true,
@@ -255,7 +270,7 @@ func (a *App) routes() http.Handler {
 	mux.HandleFunc("DELETE /library/{gameID}", a.removeGame)
 	mux.HandleFunc("PATCH /library/{gameID}", a.updatePriority)
 
-	return loggingMiddleware(mux)
+	return loggingMiddleware(a.apiKeyMiddleware(mux))
 }
 
 func firebaseOptionFromEnv() (option.ClientOption, error) {
@@ -278,6 +293,11 @@ func main() {
 		log.Println("Warning: STEAM_API_KEY not set; /steam/apps will return 503")
 	}
 
+	apiKey := os.Getenv("API_KEY")
+	if apiKey == "" {
+		log.Fatal("API_KEY env var not set")
+	}
+
 	opt, err := firebaseOptionFromEnv()
 	if err != nil {
 		log.Fatal(err)
@@ -297,6 +317,7 @@ func main() {
 	app := &App{
 		Firestore: fsClient,
 		SteamKey:  steamKey,
+		APIKey:    apiKey,
 	}
 
 	port := os.Getenv("PORT")
