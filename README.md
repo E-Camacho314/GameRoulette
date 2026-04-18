@@ -119,6 +119,7 @@ docker compose up --build
 |--------|----------|-------------|
 | `GET` | `/steam/apps` | Proxy — full Steam game catalog |
 | `GET` | `/steam/appdetails?appids=<id>` | Proxy — game details from Steam Store |
+| `GET` | `/steam/mygames?steamID=<id>` | Proxy — games owned by a Steam user |
 | `GET` | `/library?userID=<id>` | Fetch user's saved library |
 | `POST` | `/library?userID=<id>` | Add a game to the library |
 | `DELETE` | `/library/{gameID}?userID=<id>` | Remove a game |

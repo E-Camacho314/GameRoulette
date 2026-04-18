@@ -67,25 +67,22 @@ class SteamService {
     static let shared = SteamService()
 
     func fetchAllGames() async throws -> [SteamGame] {
-        let key = Secrets.steamAPIKey
-        let url = URL(string: "https://api.steampowered.com/IStoreService/GetAppList/v1/?key=" + key /*+ "&last_appid=1537570&max_results=50000""&max_results=50000"*/)!
+        let url = URL(string: BackendService.baseURL + "/steam/apps")!
         let (data, _) = try await URLSession.shared.data(from: url)
         let response = try JSONDecoder().decode(AllGamesResponse.self, from: data)
         return response.response.apps.filter { !$0.name.isEmpty }
     }
-    
-    
+
     func fetchMyGames() async throws -> [SteamGame] {
-        let key = Secrets.steamAPIKey
-        let steamID = Secrets.steamID
-        let url = URL(string: "https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=" + key + "&steamid=" + steamID + "&include_appinfo=true&include_played_free_games=true")!
+        let steamID = UserDefaults.standard.string(forKey: "userSteamID") ?? Secrets.steamID
+        let url = URL(string: BackendService.baseURL + "/steam/mygames?steamID=" + steamID)!
         let (data, _) = try await URLSession.shared.data(from: url)
         let response = try JSONDecoder().decode(OwnedGamesResponse.self, from: data)
         return response.response.games.filter { !$0.name.isEmpty }
     }
-    
+
     func fetchGameDetails(appid: Int) async -> LibraryGame? {
-        let url = URL(string: "https://store.steampowered.com/api/appdetails?appids=\(appid)")!
+        let url = URL(string: BackendService.baseURL + "/steam/appdetails?appids=\(appid)")!
         
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
