@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"math"
+	"math/rand"
 	"net/http"
 	"sort"
 )
@@ -71,10 +72,15 @@ func (a *App) recommend(w http.ResponseWriter, r *http.Request) {
 		candidates = all
 	}
 
-	// Cold start: too few games to build a meaningful profile — sort by priority only.
+	// Cold start: too few games to build a meaningful profile — sort by priority, shuffle ties.
 	if len(candidates) < 3 {
 		sort.Slice(candidates, func(i, j int) bool {
-			return priorityBoost(candidates[i].Priority) > priorityBoost(candidates[j].Priority)
+			bi := priorityBoost(candidates[i].Priority)
+			bj := priorityBoost(candidates[j].Priority)
+			if bi != bj {
+				return bi > bj
+			}
+			return rand.Float64() < 0.5
 		})
 		writeJSON(w, http.StatusOK, candidates[:min(5, len(candidates))])
 		return
@@ -142,7 +148,7 @@ func (a *App) recommend(w http.ResponseWriter, r *http.Request) {
 					redundancy = s
 				}
 			}
-			mmrScore := mmrLambda*cand.sim - (1-mmrLambda)*redundancy
+			mmrScore := mmrLambda*cand.sim - (1-mmrLambda)*redundancy + rand.Float64()*0.15
 			if mmrScore > bestScore {
 				bestScore = mmrScore
 				bestIdx = i
