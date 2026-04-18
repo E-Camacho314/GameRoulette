@@ -167,6 +167,7 @@ func (a *App) addGame(w http.ResponseWriter, r *http.Request) {
 	docID := fmt.Sprintf("%d", game.ID)
 	_, err := a.Firestore.Collection("users").Doc(userID).Collection("library").Doc(docID).Set(r.Context(), game)
 	if err != nil {
+		log.Printf("firestore write error: %v", err)
 		http.Error(w, "failed to save game", http.StatusInternalServerError)
 		return
 	}

@@ -9,5 +9,6 @@ FROM alpine:latest
 RUN apk --no-cache add ca-certificates
 WORKDIR /app
 COPY --from=builder /app/server .
+COPY --from=builder /app/firebase-service-account.json .
 EXPOSE 8080
 CMD ["./server"]
