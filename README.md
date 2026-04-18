@@ -2,128 +2,145 @@
 
 <div align="center">
 
-![Logo](https://raw.githubusercontent.com/E-Camacho314/GameRoulette/main/Lab%203%20Template/Assets.xcassets/AppIcon.appiconset/Contents.json) <!-- TODO: Add project logo (e.g., from an AppIcon) -->
-
 [![GitHub stars](https://img.shields.io/github/stars/E-Camacho314/GameRoulette?style=for-the-badge)](https://github.com/E-Camacho314/GameRoulette/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/E-Camacho314/GameRoulette?style=for-the-badge)](https://github.com/E-Camacho314/GameRoulette/network)
 [![GitHub issues](https://img.shields.io/github/issues/E-Camacho314/GameRoulette?style=for-the-badge)](https://github.com/E-Camacho314/GameRoulette/issues)
 [![GitHub license](https://img.shields.io/github/license/E-Camacho314/GameRoulette?style=for-the-badge)](LICENSE)
 
-**An engaging mobile roulette game built with Swift for a fun, interactive experience.**
-
 </div>
 
 ## 📖 Overview
 
-GameRoulette is a mobile application designed to provide a simple yet engaging roulette game experience. Developed primarily with Swift and Xcode, this project serves as an interactive demonstration of fundamental iOS app development concepts, including UI design, user interaction handling, and basic game logic. It's ideal for users looking for a quick and fun decision-making tool or developers interested in a foundational Swift-based mobile game example.
+GameRoulette is a full-stack iOS app that connects to your Steam library and recommends what to play next. Build a personal library, set priorities, mark games complete, and hit the roulette button to get a smart, ranked list of what to play — powered by a content-based filtering algorithm running on a Go backend.
 
 ## ✨ Features
 
-- 🎯 **Interactive Roulette Wheel**: A visually appealing and spinnable roulette wheel.
-- 🎲 **Randomized Outcomes**: Fair and unpredictable results for each spin.
-- 📱 **Intuitive User Interface**: Easy-to-use controls for starting and resetting the game.
-- 💬 **Result Display**: Clearly indicates the outcome of each roulette spin.
-
-## 🖥️ Screenshots
-
-![Screenshot 1](path-to-screenshot) <!-- TODO: Add actual screenshots of the app in action -->
-![Screenshot 2](path-to-screenshot) <!-- TODO: Add mobile screenshots for different states -->
+- 🎮 **Steam Integration** — Browse and search Steam's full catalog, pull in details, screenshots, genres, and descriptions
+- 📚 **Personal Library** — Add games, set priority (High / Medium / Low), and mark them complete
+- 🤖 **Smart Recommendations** — Content-based filtering using TF-IDF weighted cosine similarity + Maximal Marginal Relevance (MMR) to surface relevant *and* diverse picks
+- 🎲 **Roulette Mode** — Get 5 ranked recommendations from your library; falls back to Steam catalog for new users
+- 🎨 **Theming** — Customizable UI themes
 
 ## 🛠️ Tech Stack
 
-**Mobile Framework:**
-- <img src="https://img.shields.io/badge/Swift-FA7343?style=for-the-badge&logo=swift&logoColor=white" alt="Swift Badge"/>
-- <img src="https://img.shields.io/badge/Xcode-007AFF?style=for-the-badge&logo=Xcode&logoColor=white" alt="Xcode Badge"/>
-- <img src="https://img.shields.io/badge/UIKit-007AFF?style=for-the-badge&logo=apple&logoColor=white" alt="UIKit Badge"/> (Assumed for UI development)
+**Frontend**
+- <img src="https://img.shields.io/badge/Swift-FA7343?style=for-the-badge&logo=swift&logoColor=white" alt="Swift"/>
+- <img src="https://img.shields.io/badge/SwiftUI-007AFF?style=for-the-badge&logo=apple&logoColor=white" alt="SwiftUI"/>
+- Firebase iOS SDK (authentication)
 
-## 🚀 Quick Start
-
-To get GameRoulette up and running on your local machine, follow these steps.
-
-### Prerequisites
--   **macOS**: A computer running macOS (latest version recommended).
--   **Xcode**: The latest stable version of Xcode installed. You can download it from the Mac App Store.
-
-### Installation
-
-1.  **Clone the repository**
-    ```bash
-    git clone https://github.com/E-Camacho314/GameRoulette.git
-    cd GameRoulette
-    ```
-
-2.  **Open the project in Xcode**
-    Navigate to the cloned directory and open the `.xcodeproj` file:
-    ```bash
-    open "Lab 3 Template.xcodeproj"
-    ```
-
-3.  **Select a Simulator or Device**
-    In Xcode, from the scheme menu at the top, select your desired iOS Simulator (e.g., iPhone 15 Pro) or a connected physical device.
-
-4.  **Run the application**
-    Click the "Run" button (▶) in Xcode, or press `Cmd + R`, to build and run the application on the selected target.
+**Backend**
+- <img src="https://img.shields.io/badge/Go-00ADD8?style=for-the-badge&logo=go&logoColor=white" alt="Go"/>
+- <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker"/>
+- Google Cloud Firestore (user library persistence)
+- Steam Web API (game catalog + details proxy)
 
 ## 📁 Project Structure
 
 ```
 GameRoulette/
-├── .gitignore
-├── Lab 3 Template.xcodeproj/ # Xcode project configuration and settings
-│   ├── project.pbxproj       # Project file with build settings, file references
-│   └── ...                   # Other Xcode configuration files
-└── Lab 3 Template/           # Main source code and asset directory
-    ├── AppDelegate.swift     # App delegate for lifecycle events
-    ├── SceneDelegate.swift   # Scene delegate for UI lifecycle (if using SwiftUI/multiple scenes)
-    ├── ViewController.swift  # Main view controller for the roulette game logic and UI
-    ├── Main.storyboard       # Main interface builder file (if using UIKit Storyboards)
-    ├── Assets.xcassets/      # Contains image assets, app icon, etc.
-    ├── Info.plist            # Application configuration file
-    └── ...                   # Other Swift files or resources
+├── backend/                          # Go REST API
+│   ├── main.go                       # HTTP handlers, Firestore CRUD, server setup
+│   ├── recommendation.go             # Recommendation algorithm (TF-IDF + MMR)
+│   ├── Dockerfile
+│   ├── docker-compose.yml
+│   ├── go.mod
+│   └── go.sum
+│
+└── GameRoulette/                     # SwiftUI iOS app
+    ├── Models/
+    │   ├── BackendService.swift      # HTTP client for Go backend
+    │   ├── LibraryGameModel.swift    # LibraryGame model + LibraryManager
+    │   └── SteamService.swift        # Direct Steam API calls
+    ├── ViewModels/
+    │   ├── RecommendationViewModel.swift
+    │   ├── LibraryViewModel.swift
+    │   └── SteamGamesViewModel.swift
+    └── Views/
+        ├── MainTabView.swift
+        ├── RecommendationView.swift
+        ├── LibraryView.swift
+        ├── SteamGamesView.swift
+        └── GameDetailsView.swift
 ```
 
-## 🔧 Development
+## 🚀 Quick Start
 
-### Running in Xcode
-Once the project is open in Xcode, you can make changes to the Swift files, Storyboards, or assets. Any changes will be reflected when you rebuild and run the application.
+### Prerequisites
 
-### Understanding the Code
--   `ViewController.swift`: This file likely contains the core logic for the roulette wheel, handling user input, animation, and determining outcomes.
--   `Main.storyboard`: Defines the visual layout and connections between UI elements.
+- macOS with Xcode (latest stable)
+- Go 1.22+
+- A [Steam API key](https://steamcommunity.com/dev/apikey)
+- A Firebase project with Firestore enabled and a service account JSON key
 
-## 🧪 Testing
+### Backend (local)
 
-Xcode provides built-in testing frameworks (XCTest). While specific tests are not explicitly outlined, developers can add Unit Tests and UI Tests within Xcode to ensure the correctness of the game logic and user interface.
+```bash
+cd backend
 
-## 🤝 Contributing
+export STEAM_API_KEY="your_steam_api_key"
+export FIREBASE_CREDENTIALS='{ ...your service account JSON... }'
 
-We welcome contributions to enhance GameRoulette! If you have suggestions or want to contribute:
+go run .
+# Server starts on :8080
+```
 
-1.  Fork the repository.
-2.  Create your feature branch (`git checkout -b feature/AmazingFeature`).
-3.  Commit your changes (`git commit -m 'Add some AmazingFeature'`).
-4.  Push to the branch (`git push origin feature/AmazingFeature`).
-5.  Open a Pull Request.
+### Backend (Docker)
 
-## 📄 License
+Create `backend/.env` (gitignored):
+```env
+STEAM_API_KEY=your_steam_api_key
+FIREBASE_CREDENTIALS={ ...your service account JSON... }
+```
 
-This project is licensed under the [LICENSE_NAME](LICENSE) - see the LICENSE file for details.
+Then:
+```bash
+cd backend
+docker compose up --build
+# Server starts on :8080
+```
+
+### iOS App
+
+1. Open `GameRoulette.xcodeproj` in Xcode
+2. Add your `GoogleService-Info.plist` (Firebase config) to the `GameRoulette/` folder — this file is gitignored
+3. *(Optional)* Create `GameRoulette/Secrets.swift` to pre-fill your Steam ID at build time:
+   ```swift
+   enum Secrets {
+       static var steamID = "your_steam_id"
+   }
+   ```
+   If this file is absent, the app's Welcome screen will prompt you to enter your Steam ID manually on first launch — no file required.
+4. In `BackendService.swift`, set the production URL for Release builds
+5. Select a simulator or device and press `Cmd+R`
+
+## 🔌 API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/steam/apps` | Proxy — full Steam game catalog |
+| `GET` | `/steam/appdetails?appids=<id>` | Proxy — game details from Steam Store |
+| `GET` | `/library?userID=<id>` | Fetch user's saved library |
+| `POST` | `/library?userID=<id>` | Add a game to the library |
+| `DELETE` | `/library/{gameID}?userID=<id>` | Remove a game |
+| `PATCH` | `/library/{gameID}?userID=<id>` | Update game priority |
+| `GET` | `/recommend?userID=<id>` | Get top 5 recommended games |
+
+## 🤖 Recommendation Algorithm
+
+The `/recommend` endpoint runs a three-stage pipeline:
+
+1. **Cold start guard** — if fewer than 3 non-complete games exist, returns them sorted by priority (no scoring)
+2. **TF-IDF scoring** — genres are weighted by how distinctive they are in the user's library (rare genres the user specifically collected score higher than generic ones like "Indie" or "Action")
+3. **MMR selection** — instead of returning the top 5 scores directly, Maximal Marginal Relevance iteratively picks games that balance relevance (λ=0.7) against redundancy with already-selected games, ensuring genre diversity in results
+
+Games marked **Complete** are excluded from recommendations unless the entire library is complete, in which case they are used as the candidate pool.
 
 ## 🙏 Acknowledgments
 
--   Authored by [E-Camacho314](https://github.com/E-Camacho314).
-
-## 📞 Support & Contact
-
--   🐛 Issues: [GitHub Issues](https://github.com/E-Camacho314/GameRoulette/issues)
--   📧 Email: [contact@example.com] <!-- TODO: Add contact email -->
+Authored by [E-Camacho314](https://github.com/E-Camacho314), and [tpnguy](https://github.com/tpnguy).
 
 ---
 
 <div align="center">
-
-**⭐ Star this repo if you find it helpful!**
-
-Made with ❤️ by E-Camacho314
 
 </div>
