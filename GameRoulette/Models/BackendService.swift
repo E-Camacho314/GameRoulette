@@ -79,6 +79,18 @@ enum BackendService {
         return dtos.map { $0.toLibraryGame() }
     }
 
+    // GET /recommend?userID=<id>
+    static func fetchRecommendations(userID: String) async throws -> [LibraryGame] {
+        var comps = URLComponents(string: baseURL + "/recommend")!
+        comps.queryItems = [URLQueryItem(name: "userID", value: userID)]
+        let (data, resp) = try await URLSession.shared.data(from: comps.url!)
+        guard (resp as? HTTPURLResponse)?.statusCode == 200 else {
+            throw BackendError.badStatus((resp as? HTTPURLResponse)?.statusCode ?? 0)
+        }
+        let dtos = try JSONDecoder().decode([BackendGame].self, from: data)
+        return dtos.map { $0.toLibraryGame() }
+    }
+
     // POST /library?userID=<id>
     static func addGame(_ game: LibraryGame, userID: String) async throws {
         var comps = URLComponents(string: baseURL + "/library")!

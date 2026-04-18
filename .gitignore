@@ -3,4 +3,32 @@ GoogleService-Info.plist
 Secrets.swift
 **/Secrets.swift
 
+# Environment & secrets
+.env
+.env.*
+*.env
 
+# Firebase / Google credentials
+firebase-credentials.json
+*-credentials.json
+*-service-account.json
+serviceAccountKey.json
+
+# macOS
+.DS_Store
+
+# Xcode
+xcuserdata/
+**/xcuserdata/
+*.xcuserstate
+*.xccheckout
+*.moved-aside
+DerivedData/
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Go binaries
+backend/*.exe
+backend/backend

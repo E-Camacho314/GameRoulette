@@ -17,7 +17,15 @@ final class RecommendationViewModel: ObservableObject {
         errorMessage = nil
 
         if !userLibrary.isEmpty {
-            libraryPicks = Array(userLibrary.shuffled().prefix(count))
+            let userID = UserDefaults.standard.string(forKey: "userSteamID") ?? ""
+            isLoading = true
+            defer { isLoading = false }
+            do {
+                libraryPicks = try await BackendService.fetchRecommendations(userID: userID)
+            } catch {
+                errorMessage = error.localizedDescription
+                libraryPicks = []
+            }
             catalogPicks = []
             return
         }

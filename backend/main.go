@@ -204,6 +204,9 @@ func (a *App) routes() http.Handler {
 	mux.HandleFunc("DELETE /library/{gameID}", a.removeGame)
 	mux.HandleFunc("PATCH /library/{gameID}", a.updatePriority)
 
+	// Recommendations
+	mux.HandleFunc("GET /recommend", a.recommend)
+
 	return loggingMiddleware(mux)
 }
 
@@ -215,7 +218,6 @@ func main() {
 		log.Println("Warning: STEAM_API_KEY not set; /steam/apps will return 503")
 	}
 
-	// Load Firebase credentials from env var — required for deployment on Render/Fly.io
 	credsJSON := os.Getenv("FIREBASE_CREDENTIALS")
 	if credsJSON == "" {
 		log.Fatal("FIREBASE_CREDENTIALS env var not set")
@@ -243,7 +245,7 @@ func main() {
 		port = "8080"
 	}
 
-	log.Printf("Server listening on :%s", port)
+	log.Printf("Server listening on:%s", port)
 	if err := http.ListenAndServe(":"+port, app.routes()); err != nil {
 		log.Fatal(err)
 	}
