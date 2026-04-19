@@ -150,23 +150,11 @@ struct WelcomeView: View {
         }
         
         let savedSteamID = UserDefaults.standard.string(forKey: "userSteamID")
-        let secretsSteamID = Secrets.steamID
-        
-        var validSteamID: String?
-        
-        // Check UserDefaults first
-        if let savedID = savedSteamID, !savedID.isEmpty {
-            validSteamID = savedID
-        }
-        // Then check Secrets
-        else if !secretsSteamID.isEmpty && secretsSteamID != "" && secretsSteamID != "" {
-            validSteamID = secretsSteamID
-        }
-        
-        if let steamID = validSteamID {
+
+        if let steamID = savedSteamID, !steamID.isEmpty {
             do {
                 let ownedGames = try await SteamService.shared.fetchMyGames()
-                
+
                 if ownedGames.isEmpty {
                     await MainActor.run {
                         isLoading = false
@@ -175,9 +163,8 @@ struct WelcomeView: View {
                     }
                     return
                 }
-                
-                // Fetch details and sync all owned games to the backend
-                let userID = UserDefaults.standard.string(forKey: "userSteamID") ?? Secrets.steamID
+
+                let userID = steamID
                 for game in ownedGames {
                     if let details = await SteamService.shared.fetchGameDetails(appid: game.id) {
                         details.inLibrary = true
@@ -442,7 +429,6 @@ struct LoginView: View {
         
         Task {
             // Save Steam ID
-            Secrets.steamID = steamIDInput
             UserDefaults.standard.set(steamIDInput, forKey: "userSteamID")
             
             // Attempt to load library

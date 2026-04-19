@@ -74,7 +74,7 @@ class SteamService {
     }
 
     func fetchMyGames() async throws -> [SteamGame] {
-        let steamID = UserDefaults.standard.string(forKey: "userSteamID") ?? Secrets.steamID
+        let steamID = UserDefaults.standard.string(forKey: "userSteamID") ?? ""
         let url = URL(string: BackendService.baseURL + "/steam/mygames?steamID=" + steamID)!
         let (data, _) = try await URLSession.shared.data(for: BackendService.makeRequest(url))
         let response = try JSONDecoder().decode(OwnedGamesResponse.self, from: data)
