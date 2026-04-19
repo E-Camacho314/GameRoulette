@@ -52,7 +52,6 @@ struct GameCard: View {
             
             // Game Information
             VStack(alignment: .leading, spacing: 8) {
-                // Game Title with accent color underline
                 VStack(alignment: .leading, spacing: 4) {
                     Text(game.name)
                         .font(.headline)
@@ -132,7 +131,6 @@ struct GameCard: View {
             return
         }
         
-        // Fetch details
         if let details = await SteamService.shared.fetchGameDetails(appid: game.id) {
             gameDetails = details
             AppManager.gameCache[game.id] = details

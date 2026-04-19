@@ -76,7 +76,6 @@ struct SettingsView: View {
                             }
                         }) {
                             HStack {
-                                // Theme icon
                                 Image(systemName: themeOption.iconName)
                                     .font(.title3)
                                     .foregroundColor(themeOption.theme.primaryColor)
@@ -86,7 +85,6 @@ struct SettingsView: View {
                                     Text(themeOption.displayName)
                                         .foregroundColor(theme.textColor)
                                     
-                                    // Color preview
                                     HStack(spacing: 6) {
                                         Circle()
                                             .fill(themeOption.theme.primaryColor)

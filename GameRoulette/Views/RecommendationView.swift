@@ -16,7 +16,6 @@ struct RecommendationView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
-                    // Header
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Recommended for You")
                             .font(.largeTitle)
@@ -30,8 +29,7 @@ struct RecommendationView: View {
                             .foregroundColor(theme.secondaryTextColor)
                     }
                     .padding(.horizontal, 4)
-                    
-                    // Recommendations Content
+
                     if recommendations.isLoading {
                         ProgressView("Finding recommendations...")
                             .tint(theme.primaryColor)
@@ -58,7 +56,6 @@ struct RecommendationView: View {
                         .background(theme.cardBackgroundColor)
                         .cornerRadius(12)
                     } else if !recommendations.libraryPicks.isEmpty {
-                        // Recommendations from user's library
                         VStack(alignment: .leading, spacing: 16) {
                             Text("From Your Library")
                                 .font(.title2)
@@ -66,7 +63,6 @@ struct RecommendationView: View {
                                 .foregroundColor(theme.textColor)
                                 .padding(.horizontal, 4)
                             
-                            // Horizontal Carousel
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 20) {
                                     ForEach(recommendations.libraryPicks) { game in
@@ -81,7 +77,6 @@ struct RecommendationView: View {
                             }
                         }
                     } else if !recommendations.catalogPicks.isEmpty {
-                        // Recommendations from catalog
                         VStack(alignment: .leading, spacing: 16) {
                             Text("Discover New Games")
                                 .font(.title2)
@@ -89,7 +84,6 @@ struct RecommendationView: View {
                                 .foregroundColor(theme.textColor)
                                 .padding(.horizontal, 4)
                             
-                            // Horizontal Carousel
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 20) {
                                     ForEach(recommendations.catalogPicks) { game in
@@ -104,7 +98,6 @@ struct RecommendationView: View {
                             }
                         }
                     } else {
-                        // Empty state
                         VStack(spacing: 12) {
                             Image(systemName: "sparkles")
                                 .font(.system(size: 50))
@@ -157,7 +150,6 @@ struct LargeGameCard: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Header Image (larger)
             if let headerImage = game.headerImage, let url = URL(string: headerImage) {
                 AsyncImage(url: url) { phase in
                     switch phase {
@@ -194,9 +186,7 @@ struct LargeGameCard: View {
                     )
             }
             
-            // Game Information
             VStack(alignment: .leading, spacing: 10) {
-                // Game Title
                 VStack(alignment: .leading, spacing: 6) {
                     Text(game.title ?? "Unknown Title")
                         .font(.title3)
@@ -204,13 +194,11 @@ struct LargeGameCard: View {
                         .lineLimit(2)
                         .foregroundColor(theme.textColor)
                     
-                    // Accent color underline
                     Rectangle()
                         .fill(theme.accentColor)
                         .frame(width: 50, height: 3)
                 }
-                
-                // Developer Info
+
                 if let developers = game.developers, !developers.isEmpty {
                     HStack(spacing: 6) {
                         Image(systemName: "person.fill")
@@ -222,8 +210,7 @@ struct LargeGameCard: View {
                             .foregroundColor(theme.secondaryTextColor)
                     }
                 }
-                
-                // Genre Tags
+
                 if let genres = game.genres, !genres.isEmpty {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 6) {
@@ -244,8 +231,7 @@ struct LargeGameCard: View {
                         }
                     }
                 }
-                
-                // Priority Badge
+
                 if let priority = game.priority, priority != "None" {
                     HStack(spacing: 6) {
                         Image(systemName: priorityBadgeIcon(priority))
@@ -261,7 +247,6 @@ struct LargeGameCard: View {
                     .foregroundColor(.white)
                 }
                 
-                // In Library Badge
                 if game.inLibrary {
                     HStack(spacing: 6) {
                         Image(systemName: "checkmark.circle.fill")
@@ -297,7 +282,6 @@ struct LargeGameCard: View {
     }
 }
 
-// MARK: - Large Catalog Game Card
 struct LargeCatalogGameCard: View {
     let game: SteamGame
     @State private var gameDetails: LibraryGame?
@@ -305,7 +289,6 @@ struct LargeCatalogGameCard: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Header Image (larger)
             if let headerImage = gameDetails?.headerImage, let url = URL(string: headerImage) {
                 AsyncImage(url: url) { phase in
                     switch phase {
@@ -346,7 +329,6 @@ struct LargeCatalogGameCard: View {
             
             // Game Information
             VStack(alignment: .leading, spacing: 10) {
-                // Game Title
                 VStack(alignment: .leading, spacing: 6) {
                     Text(game.name)
                         .font(.title3)
@@ -354,13 +336,11 @@ struct LargeCatalogGameCard: View {
                         .lineLimit(2)
                         .foregroundColor(theme.textColor)
                     
-                    // Accent color underline
                     Rectangle()
                         .fill(theme.accentColor)
                         .frame(width: 50, height: 3)
                 }
                 
-                // Developer Info
                 if let developers = gameDetails?.developers, !developers.isEmpty {
                     HStack(spacing: 6) {
                         Image(systemName: "person.fill")
@@ -373,7 +353,6 @@ struct LargeCatalogGameCard: View {
                     }
                 }
                 
-                // Genre Tags
                 if let genres = gameDetails?.genres, !genres.isEmpty {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 6) {
@@ -394,8 +373,7 @@ struct LargeCatalogGameCard: View {
                         }
                     }
                 }
-                
-                // In Library Badge (if applicable)
+
                 if gameDetails?.inLibrary == true {
                     HStack(spacing: 6) {
                         Image(systemName: "checkmark.circle.fill")

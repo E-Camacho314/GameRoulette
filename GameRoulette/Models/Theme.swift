@@ -50,7 +50,6 @@ enum AppTheme: String, CaseIterable {
     }
 }
 
-// MARK: - Light Theme
 struct LightTheme: Theme {
     let name = "Light"
     let primaryColor = Color.blue
@@ -67,7 +66,6 @@ struct LightTheme: Theme {
     let tintColor = Color.blue
 }
 
-// MARK: - Dark Theme
 struct DarkTheme: Theme {
     let name = "Dark"
     let primaryColor = Color.cyan

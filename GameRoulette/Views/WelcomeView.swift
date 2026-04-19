@@ -17,10 +17,9 @@ struct WelcomeView: View {
     
     var body: some View {
         ZStack {
-            // Background
+
             WaveBackground(isAnimating: $isAnimating, theme: theme)
             
-            // Main Content
             VStack(spacing: 30) {
                 Spacer()
                 
@@ -47,7 +46,6 @@ struct WelcomeView: View {
                 }
                 .padding(.horizontal)
                 
-                // Feature Cards
                 VStack(spacing: 16) {
                     FeatureCard(
                         icon: "books.vertical",
@@ -77,7 +75,6 @@ struct WelcomeView: View {
                 
                 Spacer()
                 
-                // Login Button
                 Button(action: {
                     Task {
                         await validateAndNavigate()

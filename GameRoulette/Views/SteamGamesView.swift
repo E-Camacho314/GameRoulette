@@ -54,7 +54,6 @@ struct SteamGamesView: View {
                     .background(theme.backgroundColor)
                 }
                 else {
-                    // View Toggle Header
                     VStack(spacing: 0) {
                         HStack {
                             Text("Steam Games (\(filteredGames.count))")
@@ -139,7 +138,6 @@ struct SteamGamesView: View {
         List(filteredGames) { game in
             NavigationLink(destination: GameDetailLoaderView(appid: game.id)) {
                 HStack(spacing: 12) {
-                    // Thumbnail
                     if let cachedGame = AppManager.gameCache[game.id],
                        let headerImage = cachedGame.headerImage,
                        let url = URL(string: headerImage) {
@@ -217,8 +215,4 @@ struct SteamGamesView: View {
             await viewModel.loadGames()
         }
     }
-}
-
-#Preview {
-    SteamGamesView()
 }

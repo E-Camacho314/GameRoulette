@@ -161,13 +161,12 @@ struct LoginView: View {
         } message: {
             Text("""
                 1. Open Steam and go to your profile
-                2. Right-click on your profile page and select "Copy Page URL"
+                2. Click on the URL on your profile page under the taskbar
                 3. Your Steam ID is the long number in the URL
+                4. If you have set up a custom URL, you will need to remove it to see your ID
                 
                 Example: https://steamcommunity.com/profiles/76561198000000000/
                 Steam ID: 76561198000000000
-                
-                Note: Make sure your profile is set to Public in privacy settings.
                 """)
         }
     }
@@ -193,7 +192,7 @@ struct LoginView: View {
                         withAnimation(.easeInOut(duration: 0.3)) {
                             isLoading = false
                             showError = true
-                            errorMessage = "No games found. Please check your privacy settings or try a different Steam ID."
+                            errorMessage = "No games found. Please try a different Steam ID."
                         }
                     }
                     return
