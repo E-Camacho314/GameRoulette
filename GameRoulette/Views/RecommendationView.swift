@@ -12,15 +12,10 @@ struct RecommendationView: View {
     @Environment(\.theme) var theme
     @Environment(\.dismiss) var dismiss
     
-    private let columns = [
-        GridItem(.flexible(), spacing: 16),
-        GridItem(.flexible(), spacing: 16)
-    ]
-    
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
+                VStack(alignment: .leading, spacing: 24) {
                     // Header
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Recommended for You")
@@ -64,38 +59,48 @@ struct RecommendationView: View {
                         .cornerRadius(12)
                     } else if !recommendations.libraryPicks.isEmpty {
                         // Recommendations from user's library
-                        VStack(alignment: .leading, spacing: 12) {
+                        VStack(alignment: .leading, spacing: 16) {
                             Text("From Your Library")
                                 .font(.title2)
                                 .fontWeight(.semibold)
                                 .foregroundColor(theme.textColor)
                                 .padding(.horizontal, 4)
                             
-                            LazyVGrid(columns: columns, spacing: 16) {
-                                ForEach(recommendations.libraryPicks) { game in
-                                    NavigationLink(destination: GameDetailView(game: game)) {
-                                        LibraryGameCard(game: game)
+                            // Horizontal Carousel
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 20) {
+                                    ForEach(recommendations.libraryPicks) { game in
+                                        NavigationLink(destination: GameDetailView(game: game)) {
+                                            LargeGameCard(game: game)
+                                        }
+                                        .buttonStyle(PlainButtonStyle())
                                     }
-                                    .buttonStyle(PlainButtonStyle())
                                 }
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 8)
                             }
                         }
                     } else if !recommendations.catalogPicks.isEmpty {
                         // Recommendations from catalog
-                        VStack(alignment: .leading, spacing: 12) {
+                        VStack(alignment: .leading, spacing: 16) {
                             Text("Discover New Games")
                                 .font(.title2)
                                 .fontWeight(.semibold)
                                 .foregroundColor(theme.textColor)
                                 .padding(.horizontal, 4)
                             
-                            LazyVGrid(columns: columns, spacing: 16) {
-                                ForEach(recommendations.catalogPicks) { game in
-                                    NavigationLink(destination: GameDetailLoaderView(appid: game.id)) {
-                                        CatalogGameCard(game: game)
+                            // Horizontal Carousel
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 20) {
+                                    ForEach(recommendations.catalogPicks) { game in
+                                        NavigationLink(destination: GameDetailLoaderView(appid: game.id)) {
+                                            LargeCatalogGameCard(game: game)
+                                        }
+                                        .buttonStyle(PlainButtonStyle())
                                     }
-                                    .buttonStyle(PlainButtonStyle())
                                 }
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 8)
                             }
                         }
                     } else {
@@ -123,13 +128,6 @@ struct RecommendationView: View {
             .navigationTitle("Recommendations")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "chevron.left")
-                            .foregroundColor(theme.primaryColor)
-                    }
-                }
-                
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {
                         Task {
@@ -153,33 +151,179 @@ struct RecommendationView: View {
     }
 }
 
-// MARK: - Catalog Game Card (for recommendations)
-struct CatalogGameCard: View {
+struct LargeGameCard: View {
+    let game: LibraryGame
+    @Environment(\.theme) var theme
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            // Header Image (larger)
+            if let headerImage = game.headerImage, let url = URL(string: headerImage) {
+                AsyncImage(url: url) { phase in
+                    switch phase {
+                    case .empty:
+                        Rectangle()
+                            .fill(theme.secondaryBackgroundColor.opacity(0.3))
+                            .overlay(ProgressView())
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                    case .failure:
+                        Rectangle()
+                            .fill(theme.secondaryBackgroundColor.opacity(0.3))
+                            .overlay(
+                                Image(systemName: "gamecontroller")
+                                    .font(.largeTitle)
+                                    .foregroundColor(theme.secondaryTextColor)
+                            )
+                    @unknown default:
+                        EmptyView()
+                    }
+                }
+                .frame(width: 280, height: 140)
+                .clipped()
+            } else {
+                Rectangle()
+                    .fill(theme.secondaryBackgroundColor.opacity(0.3))
+                    .frame(width: 280, height: 140)
+                    .overlay(
+                        Image(systemName: "gamecontroller")
+                            .font(.largeTitle)
+                            .foregroundColor(theme.secondaryTextColor)
+                    )
+            }
+            
+            // Game Information
+            VStack(alignment: .leading, spacing: 10) {
+                // Game Title
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(game.title ?? "Unknown Title")
+                        .font(.title3)
+                        .fontWeight(.bold)
+                        .lineLimit(2)
+                        .foregroundColor(theme.textColor)
+                    
+                    // Accent color underline
+                    Rectangle()
+                        .fill(theme.accentColor)
+                        .frame(width: 50, height: 3)
+                }
+                
+                // Developer Info
+                if let developers = game.developers, !developers.isEmpty {
+                    HStack(spacing: 6) {
+                        Image(systemName: "person.fill")
+                            .font(.caption)
+                            .foregroundColor(theme.accentColor)
+                        Text(developers.joined(separator: ", "))
+                            .font(.caption)
+                            .lineLimit(1)
+                            .foregroundColor(theme.secondaryTextColor)
+                    }
+                }
+                
+                // Genre Tags
+                if let genres = game.genres, !genres.isEmpty {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 6) {
+                            ForEach(genres.prefix(3), id: \.self) { genre in
+                                Text(genre)
+                                    .font(.caption2)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(theme.accentColor.opacity(0.1))
+                                    .cornerRadius(6)
+                                    .foregroundColor(theme.accentColor)
+                            }
+                            if genres.count > 3 {
+                                Text("+\(genres.count - 3)")
+                                    .font(.caption2)
+                                    .foregroundColor(theme.secondaryTextColor)
+                            }
+                        }
+                    }
+                }
+                
+                // Priority Badge
+                if let priority = game.priority, priority != "None" {
+                    HStack(spacing: 6) {
+                        Image(systemName: priorityBadgeIcon(priority))
+                            .font(.caption2)
+                        Text(priority)
+                            .font(.caption2)
+                            .fontWeight(.semibold)
+                    }
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(priority == "High" ? theme.errorColor : priority == "Medium" ? theme.warningColor : theme.successColor)
+                    .cornerRadius(8)
+                    .foregroundColor(.white)
+                }
+                
+                // In Library Badge
+                if game.inLibrary {
+                    HStack(spacing: 6) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.caption)
+                            .foregroundColor(theme.accentColor)
+                        Text("In Library")
+                            .font(.caption)
+                            .fontWeight(.medium)
+                            .foregroundColor(theme.accentColor)
+                    }
+                    .padding(.top, 4)
+                }
+            }
+            .padding(14)
+        }
+        .frame(width: 280)
+        .background(theme.cardBackgroundColor)
+        .cornerRadius(16)
+        .shadow(color: Color.black.opacity(0.15), radius: 8, x: 0, y: 4)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(theme.accentColor.opacity(0.2), lineWidth: 1)
+        )
+    }
+    
+    private func priorityBadgeIcon(_ priority: String) -> String {
+        switch priority.lowercased() {
+        case "high": return "star.fill"
+        case "medium": return "flag.fill"
+        case "low": return "circle.fill"
+        default: return "tag.fill"
+        }
+    }
+}
+
+// MARK: - Large Catalog Game Card
+struct LargeCatalogGameCard: View {
     let game: SteamGame
     @State private var gameDetails: LibraryGame?
     @Environment(\.theme) var theme
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Header Image
+            // Header Image (larger)
             if let headerImage = gameDetails?.headerImage, let url = URL(string: headerImage) {
                 AsyncImage(url: url) { phase in
                     switch phase {
                     case .empty:
                         Rectangle()
                             .fill(theme.secondaryBackgroundColor.opacity(0.3))
-                            .frame(height: 85)
+                            .frame(width: 280, height: 140)
                             .overlay(ProgressView())
                     case .success(let image):
                         image
                             .resizable()
                             .aspectRatio(contentMode: .fill)
-                            .frame(height: 85)
+                            .frame(width: 280, height: 140)
                             .clipped()
                     case .failure:
                         Rectangle()
                             .fill(theme.secondaryBackgroundColor.opacity(0.3))
-                            .frame(height: 85)
+                            .frame(width: 280, height: 140)
                             .overlay(
                                 Image(systemName: "gamecontroller")
                                     .font(.largeTitle)
@@ -192,7 +336,7 @@ struct CatalogGameCard: View {
             } else {
                 Rectangle()
                     .fill(theme.secondaryBackgroundColor.opacity(0.3))
-                    .frame(height: 85)
+                    .frame(width: 280, height: 140)
                     .overlay(
                         Image(systemName: "gamecontroller")
                             .font(.largeTitle)
@@ -201,33 +345,79 @@ struct CatalogGameCard: View {
             }
             
             // Game Information
-            VStack(alignment: .leading, spacing: 8) {
-                Text(game.name)
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                    .lineLimit(2)
-                    .foregroundColor(theme.textColor)
+            VStack(alignment: .leading, spacing: 10) {
+                // Game Title
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(game.name)
+                        .font(.title3)
+                        .fontWeight(.bold)
+                        .lineLimit(2)
+                        .foregroundColor(theme.textColor)
+                    
+                    // Accent color underline
+                    Rectangle()
+                        .fill(theme.accentColor)
+                        .frame(width: 50, height: 3)
+                }
                 
+                // Developer Info
                 if let developers = gameDetails?.developers, !developers.isEmpty {
-                    HStack(spacing: 4) {
+                    HStack(spacing: 6) {
                         Image(systemName: "person.fill")
-                            .font(.caption2)
-                            .foregroundColor(theme.secondaryTextColor)
+                            .font(.caption)
+                            .foregroundColor(theme.accentColor)
                         Text(developers.joined(separator: ", "))
                             .font(.caption)
                             .lineLimit(1)
                             .foregroundColor(theme.secondaryTextColor)
                     }
                 }
+                
+                // Genre Tags
+                if let genres = gameDetails?.genres, !genres.isEmpty {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 6) {
+                            ForEach(genres.prefix(3), id: \.self) { genre in
+                                Text(genre)
+                                    .font(.caption2)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(theme.accentColor.opacity(0.1))
+                                    .cornerRadius(6)
+                                    .foregroundColor(theme.accentColor)
+                            }
+                            if genres.count > 3 {
+                                Text("+\(genres.count - 3)")
+                                    .font(.caption2)
+                                    .foregroundColor(theme.secondaryTextColor)
+                            }
+                        }
+                    }
+                }
+                
+                // In Library Badge (if applicable)
+                if gameDetails?.inLibrary == true {
+                    HStack(spacing: 6) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.caption)
+                            .foregroundColor(theme.accentColor)
+                        Text("In Library")
+                            .font(.caption)
+                            .fontWeight(.medium)
+                            .foregroundColor(theme.accentColor)
+                    }
+                    .padding(.top, 4)
+                }
             }
-            .padding(12)
+            .padding(14)
         }
+        .frame(width: 280)
         .background(theme.cardBackgroundColor)
-        .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+        .cornerRadius(16)
+        .shadow(color: Color.black.opacity(0.15), radius: 8, x: 0, y: 4)
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(theme.secondaryTextColor.opacity(0.2), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(theme.accentColor.opacity(0.2), lineWidth: 1)
         )
         .task {
             if let cached = AppManager.gameCache[game.id] {
@@ -239,4 +429,3 @@ struct CatalogGameCard: View {
         }
     }
 }
-

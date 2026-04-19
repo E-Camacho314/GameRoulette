@@ -3,7 +3,6 @@
 //
 import SwiftUI
 
-// MARK: - Steam Games View
 struct SteamGamesView: View {
     
     @StateObject private var viewModel = SteamGamesViewModel()
@@ -11,7 +10,6 @@ struct SteamGamesView: View {
     @State private var isGridView = true
     @Environment(\.theme) var theme
     
-    // Grid layout configuration
     private let columns = [
         GridItem(.flexible(), spacing: 16),
         GridItem(.flexible(), spacing: 16)
@@ -87,7 +85,6 @@ struct SteamGamesView: View {
                         .padding(.top, 8)
                         .padding(.bottom, 8)
                         
-                        // Content based on view mode
                         if isGridView {
                             gridContent
                         } else {
@@ -117,7 +114,6 @@ struct SteamGamesView: View {
         .tint(theme.primaryColor)
     }
     
-    // MARK: - Grid Content
     @ViewBuilder
     private var gridContent: some View {
         ScrollView {
@@ -138,7 +134,6 @@ struct SteamGamesView: View {
         }
     }
     
-    // MARK: - List Content
     @ViewBuilder
     private var listContent: some View {
         List(filteredGames) { game in
@@ -187,7 +182,6 @@ struct SteamGamesView: View {
                             )
                     }
                     
-                    // Game Info
                     VStack(alignment: .leading, spacing: 4) {
                         Text(game.name)
                             .font(.headline)
@@ -205,7 +199,6 @@ struct SteamGamesView: View {
                     
                     Spacer()
                     
-                    // In Library Badge
                     if let cachedGame = AppManager.gameCache[game.id],
                        cachedGame.inLibrary {
                         Image(systemName: "checkmark.circle.fill")

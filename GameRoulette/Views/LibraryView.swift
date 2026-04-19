@@ -7,6 +7,7 @@ struct LibraryView: View {
     @ObservedObject private var libraryManager = LibraryManager.shared
     @State private var isLoadingLibrary = false
     @State private var libraryError: String?
+    @State private var isGridView = true
     @Environment(\.theme) var theme
 
     private let columns = [
@@ -18,30 +19,44 @@ struct LibraryView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
-                        
-                    Text("My Library \(libraryManager.userLibrary.count) Games")
-                        .font(.largeTitle)
-                        .bold()
-                        .foregroundColor(theme.primaryColor)
-                        .padding(.horizontal, 6)
                     
-                    // Library Section
-                    librarySection
+                    HStack {
+                        Text("My Library (\(libraryManager.userLibrary.count) Games)")
+                            .font(.largeTitle)
+                            .bold()
+                            .foregroundColor(theme.primaryColor)
+                        
+                        Spacer()
+                        
+                        HStack(spacing: 8) {
+                            Button(action: { isGridView = true }) {
+                                Image(systemName: "square.grid.2x2")
+                                    .font(.title3)
+                                    .foregroundColor(isGridView ? theme.primaryColor : theme.secondaryTextColor)
+                            }
+                            
+                            Button(action: { isGridView = false }) {
+                                Image(systemName: "list.bullet")
+                                    .font(.title3)
+                                    .foregroundColor(!isGridView ? theme.primaryColor : theme.secondaryTextColor)
+                            }
+                        }
+                        .padding(6)
+                        .background(theme.backgroundColor.opacity(0.5))
+                        .cornerRadius(8)
+                    }
+                    .padding(.horizontal, 6)
+                    
+                    if isGridView {
+                        librarySectionGrid
+                    } else {
+                        librarySectionList
+                    }
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
             }
             .background(theme.backgroundColor)
-            .toolbar {
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { refreshLibrary() }) {
-                        Image(systemName: "arrow.clockwise")
-                            .font(.caption)
-                            .foregroundColor(theme.primaryColor)
-                    }
-                }
-            }
         }
         .onAppear {
             if libraryManager.userLibrary.isEmpty {
@@ -50,9 +65,8 @@ struct LibraryView: View {
         }
     }
     
-    // MARK: - Library Section
     @ViewBuilder
-    private var librarySection: some View {
+    private var librarySectionGrid: some View {
         VStack(alignment: .leading, spacing: 12) {
             if isLoadingLibrary {
                 ProgressView("Loading your library...")
@@ -110,7 +124,132 @@ struct LibraryView: View {
         }
     }
     
-    // MARK: - Helper Functions
+    @ViewBuilder
+    private var librarySectionList: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            if isLoadingLibrary {
+                ProgressView("Loading your library...")
+                    .tint(theme.accentColor)
+                    .frame(maxWidth: .infinity, minHeight: 200)
+                    .background(theme.cardBackgroundColor)
+                    .cornerRadius(12)
+            } else if let error = libraryError {
+                VStack(spacing: 12) {
+                    Image(systemName: "exclamationmark.triangle")
+                        .font(.largeTitle)
+                        .foregroundColor(theme.warningColor)
+                    Text(error)
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(theme.secondaryTextColor)
+                    Button("Try Again") {
+                        refreshLibrary()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(theme.accentColor)
+                }
+                .frame(maxWidth: .infinity, minHeight: 200)
+                .background(theme.cardBackgroundColor)
+                .cornerRadius(12)
+            } else if libraryManager.userLibrary.isEmpty {
+                VStack(spacing: 12) {
+                    Image(systemName: "books.vertical")
+                        .font(.system(size: 50))
+                        .foregroundColor(theme.accentColor)
+                    Text("No games in your library")
+                        .font(.headline)
+                        .foregroundColor(theme.textColor)
+                    Text("Make sure your Steam profile is set to Public")
+                        .font(.caption)
+                        .foregroundColor(theme.secondaryTextColor)
+                    Button("Refresh") {
+                        refreshLibrary()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(theme.accentColor)
+                }
+                .frame(maxWidth: .infinity, minHeight: 200)
+                .background(theme.cardBackgroundColor)
+                .cornerRadius(12)
+            } else {
+                LazyVStack(spacing: 12) {
+                    ForEach(libraryManager.userLibrary) { game in
+                        NavigationLink(destination: GameDetailView(game: game)) {
+                            HStack(spacing: 12) {
+                                if let headerImage = game.headerImage, let url = URL(string: headerImage) {
+                                    AsyncImage(url: url) { phase in
+                                        switch phase {
+                                        case .empty:
+                                            Rectangle()
+                                                .fill(theme.secondaryBackgroundColor.opacity(0.3))
+                                                .frame(width: 50, height: 50)
+                                                .cornerRadius(8)
+                                        case .success(let image):
+                                            image
+                                                .resizable()
+                                                .aspectRatio(contentMode: .fill)
+                                                .frame(width: 50, height: 50)
+                                                .cornerRadius(8)
+                                        case .failure:
+                                            Rectangle()
+                                                .fill(theme.secondaryBackgroundColor.opacity(0.3))
+                                                .frame(width: 50, height: 50)
+                                                .cornerRadius(8)
+                                                .overlay(
+                                                    Image(systemName: "gamecontroller")
+                                                        .font(.caption)
+                                                        .foregroundColor(theme.secondaryTextColor)
+                                                )
+                                        @unknown default:
+                                            EmptyView()
+                                        }
+                                    }
+                                } else {
+                                    Rectangle()
+                                        .fill(theme.secondaryBackgroundColor.opacity(0.3))
+                                        .frame(width: 50, height: 50)
+                                        .cornerRadius(8)
+                                        .overlay(
+                                            Image(systemName: "gamecontroller")
+                                                .font(.caption)
+                                                .foregroundColor(theme.secondaryTextColor)
+                                        )
+                                }
+                                
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(game.title ?? "Unknown Title")
+                                        .font(.headline)
+                                        .foregroundColor(theme.textColor)
+                                    
+                                    if let developers = game.developers, !developers.isEmpty {
+                                        Text(developers.joined(separator: ", "))
+                                            .font(.caption)
+                                            .foregroundColor(theme.secondaryTextColor)
+                                            .lineLimit(1)
+                                    }
+                                }
+                                
+                                Spacer()
+                                
+                                if let priority = game.priority, priority != "None" {
+                                    Text(priority)
+                                        .font(.caption2)
+                                        .fontWeight(.bold)
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .background(priority == "High" ? theme.errorColor : priority == "Medium" ? theme.warningColor : theme.successColor)
+                                        .cornerRadius(6)
+                                }
+                            }
+                            .padding(.vertical, 4)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    }
+                }
+            }
+        }
+    }
+    
     private func refreshLibrary() {
         Task {
             await loadUserLibrary()
@@ -122,10 +261,9 @@ struct LibraryView: View {
         isLoadingLibrary = true
         libraryError = nil
         
-        // Get the saved Steam ID
         let savedSteamID = UserDefaults.standard.string(forKey: "userSteamID") ?? Secrets.steamID
         
-        guard !savedSteamID.isEmpty && savedSteamID != "YOUR_STEAM_ID_HERE" else {
+        guard !savedSteamID.isEmpty && savedSteamID != "" else {
             libraryError = "No Steam ID found. Please restart the app and enter your Steam ID."
             isLoadingLibrary = false
             return
@@ -142,14 +280,12 @@ struct LibraryView: View {
     }
 }
 
-// MARK: - Library Game Card with Accent Color Accents
 struct LibraryGameCard: View {
     let game: LibraryGame
     @Environment(\.theme) var theme
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Header Image
             if let headerImage = game.headerImage, let url = URL(string: headerImage) {
                 AsyncImage(url: url) { phase in
                     switch phase {
@@ -186,7 +322,6 @@ struct LibraryGameCard: View {
                     )
             }
             
-            // Game Information
             VStack(alignment: .leading, spacing: 8) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(game.title ?? "Unknown Title")
@@ -196,13 +331,11 @@ struct LibraryGameCard: View {
                         .multilineTextAlignment(.leading)
                         .foregroundColor(theme.textColor)
                     
-                    // Accent color underline
                     Rectangle()
                         .fill(theme.accentColor)
                         .frame(width: 40, height: 2)
                 }
                 
-                // Developer Info
                 if let developers = game.developers, !developers.isEmpty {
                     HStack(spacing: 4) {
                         Image(systemName: "person.fill")
@@ -214,8 +347,7 @@ struct LibraryGameCard: View {
                             .foregroundColor(theme.secondaryTextColor)
                     }
                 }
-                
-                // Genre Tags with accent color
+
                 if let genres = game.genres, !genres.isEmpty {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 4) {
@@ -236,8 +368,7 @@ struct LibraryGameCard: View {
                         }
                     }
                 }
-                
-                // Priority Badge
+
                 if let priority = game.priority, priority != "None" {
                     HStack(spacing: 4) {
                         Image(systemName: priorityBadgeIcon(priority))
@@ -253,7 +384,6 @@ struct LibraryGameCard: View {
                     .padding(.top, 4)
                 }
                 
-                // In Library indicator with accent color
                 if game.inLibrary {
                     HStack(spacing: 4) {
                         Image(systemName: "checkmark.circle.fill")
@@ -285,9 +415,4 @@ struct LibraryGameCard: View {
         default: return "tag.fill"
         }
     }
-}
-
-#Preview {
-    LibraryView()
-        .applyTheme()
 }

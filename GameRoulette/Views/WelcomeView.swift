@@ -6,9 +6,6 @@
 //
 import SwiftUI
 
-// MARK: - Welcome View
-import SwiftUI
-
 struct WelcomeView: View {
     @State private var isAnimating = false
     @State private var showingLogin = false
@@ -20,27 +17,14 @@ struct WelcomeView: View {
     
     var body: some View {
         ZStack {
-            // Wave Animated Background
+            // Background
             WaveBackground(isAnimating: $isAnimating, theme: theme)
-            
-            // Loading Overlay
-            if isLoading {
-                Color.black.opacity(0.4)
-                    .ignoresSafeArea()
-                ProgressView("Validating Steam ID...")
-                    .tint(theme.primaryColor)
-                    .padding()
-                    .background(theme.cardBackgroundColor)
-                    .cornerRadius(12)
-            }
             
             // Main Content
             VStack(spacing: 30) {
                 Spacer()
                 
-                // Logo and Title
                 VStack(spacing: 20) {
-                    // Animated Logo
                     Image(systemName: "gamecontroller.fill")
                         .font(.system(size: 80))
                         .foregroundColor(theme.primaryColor)
@@ -58,7 +42,7 @@ struct WelcomeView: View {
                     
                     Text("Discover Your Next Adventure")
                         .font(.title3)
-                        .foregroundColor(theme.secondaryTextColor)
+                        .foregroundColor(theme.accentColor)
                         .multilineTextAlignment(.center)
                 }
                 .padding(.horizontal)
@@ -124,7 +108,29 @@ struct WelcomeView: View {
                 .scaleEffect(isAnimating ? 1 : 0.95)
                 .animation(.spring(response: 0.6, dampingFraction: 0.7), value: isAnimating)
             }
+            
+            if isLoading {
+                Color.black.opacity(0.4)
+                    .ignoresSafeArea()
+                    .transition(.opacity)
+                
+                VStack(spacing: 16) {
+                    ProgressView()
+                        .tint(theme.primaryColor)
+                        .scaleEffect(1.5)
+                    
+                    Text("Validating Steam ID...")
+                        .font(.headline)
+                        .foregroundColor(theme.textColor)
+                }
+                .padding(24)
+                .background(theme.cardBackgroundColor)
+                .cornerRadius(16)
+                .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 5)
+                .transition(.scale.combined(with: .opacity))
+            }
         }
+        .animation(.easeInOut(duration: 0.3), value: isLoading)
         .fullScreenCover(isPresented: $navigateToMainApp) {
             MainTabView()
         }
@@ -146,7 +152,9 @@ struct WelcomeView: View {
     
     private func validateAndNavigate() async {
         await MainActor.run {
-            isLoading = true
+            withAnimation(.easeInOut(duration: 0.3)) {
+                isLoading = true
+            }
         }
         
         let savedSteamID = UserDefaults.standard.string(forKey: "userSteamID")
@@ -154,11 +162,9 @@ struct WelcomeView: View {
         
         var validSteamID: String?
         
-        // Check UserDefaults first
         if let savedID = savedSteamID, !savedID.isEmpty {
             validSteamID = savedID
         }
-        // Then check Secrets
         else if !secretsSteamID.isEmpty && secretsSteamID != "" && secretsSteamID != "" {
             validSteamID = secretsSteamID
         }
@@ -169,14 +175,15 @@ struct WelcomeView: View {
                 
                 if ownedGames.isEmpty {
                     await MainActor.run {
-                        isLoading = false
-                        showError = true
-                        errorMessage = "No games found. Please check your privacy settings or try a different Steam ID."
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            isLoading = false
+                            showError = true
+                            errorMessage = "No games found. Please check your privacy settings or try a different Steam ID."
+                        }
                     }
                     return
                 }
                 
-                // Fetch details and sync all owned games to the backend
                 let userID = UserDefaults.standard.string(forKey: "userSteamID") ?? Secrets.steamID
                 for game in ownedGames {
                     if let details = await SteamService.shared.fetchGameDetails(appid: game.id) {
@@ -187,33 +194,37 @@ struct WelcomeView: View {
                 }
 
                 await MainActor.run {
-                    isLoading = false
-                    navigateToMainApp = true
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        isLoading = false
+                        navigateToMainApp = true
+                    }
                 }
             } catch {
                 await MainActor.run {
-                    isLoading = false
-                    showError = true
-                    errorMessage = "Failed to load library: \(error.localizedDescription)"
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        isLoading = false
+                        showError = true
+                        errorMessage = "Failed to load library: \(error.localizedDescription)"
+                    }
                 }
             }
         } else {
             await MainActor.run {
-                isLoading = false
-                showingLogin = true
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    isLoading = false
+                    showingLogin = true
+                }
             }
         }
     }
 }
 
-// MARK: - Wave Background Animation
 struct WaveBackground: View {
     @Binding var isAnimating: Bool
     let theme: any Theme
     
     var body: some View {
         ZStack {
-            // Base gradient background
             LinearGradient(
                 colors: [
                     theme.backgroundColor,
@@ -224,7 +235,6 @@ struct WaveBackground: View {
             )
             .ignoresSafeArea()
             
-            // Animated waves
             WaveShape(progress: isAnimating ? 1 : 0, amplitude: 30, frequency: 2)
                 .fill(theme.primaryColor.opacity(0.15))
                 .offset(y: isAnimating ? -50 : 0)
@@ -240,7 +250,6 @@ struct WaveBackground: View {
                 .offset(y: isAnimating ? -25 : 25)
                 .animation(.easeInOut(duration: 3.5).repeatForever(autoreverses: true), value: isAnimating)
             
-            // Floating particles/glow effects
             ForEach(0..<15) { index in
                 Circle()
                     .fill(theme.primaryColor.opacity(0.08))
@@ -259,7 +268,6 @@ struct WaveBackground: View {
     }
 }
 
-// MARK: - Wave Shape
 struct WaveShape: Shape {
     var progress: CGFloat
     var amplitude: CGFloat
@@ -300,7 +308,6 @@ struct FeatureCard: View {
     
     var body: some View {
         HStack(spacing: 16) {
-            // Icon
             Image(systemName: icon)
                 .font(.title2)
                 .foregroundColor(theme.primaryColor)
@@ -308,7 +315,6 @@ struct FeatureCard: View {
                 .background(theme.primaryColor.opacity(0.1))
                 .cornerRadius(10)
             
-            // Text
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(.headline)
@@ -328,147 +334,6 @@ struct FeatureCard: View {
             RoundedRectangle(cornerRadius: 12)
                 .stroke(theme.primaryColor.opacity(0.2), lineWidth: 1)
         )
-    }
-}
-
-struct LoginView: View {
-    @State private var steamIDInput = ""
-    @State private var isLoading = false
-    @State private var navigateToLibrary = false
-    @Environment(\.theme) var theme
-    @Environment(\.dismiss) var dismiss
-    
-    var body: some View {
-        NavigationStack {
-            VStack(spacing: 20) {
-                Spacer()
-                HStack {
-                    Button(action: { dismiss() }) {
-                        HStack {
-                            Image(systemName: "chevron.left")
-                            Text("Back")
-                        }
-                        .foregroundColor(theme.primaryColor)
-                    }
-                    Spacer()
-                }
-                .padding(.horizontal, 32)
-                
-                // Icon
-                Image(systemName: "steam")
-                    .font(.system(size: 80))
-                    .foregroundColor(theme.primaryColor)
-                    .padding(.bottom, 20)
-                
-                Text("Steam Library Access")
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .foregroundColor(theme.textColor)
-                
-                Text("Enter your Steam ID to view your game library")
-                    .font(.body)
-                    .foregroundColor(theme.secondaryTextColor)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
-                
-                VStack(alignment: .leading, spacing: 8) {
-                    TextField("Steam ID", text: $steamIDInput)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                        .font(.body)
-                        .foregroundColor(theme.textColor)
-                    
-                    Button(action: { showingHelp = true }) {
-                        HStack {
-                            Image(systemName: "questionmark.circle")
-                                .font(.caption)
-                            Text("How to find your Steam ID?")
-                                .font(.caption)
-                        }
-                        .foregroundColor(theme.primaryColor)
-                    }
-                }
-                .padding(.horizontal, 32)
-                
-                if isLoading {
-                    ProgressView("Verifying Steam ID...")
-                        .tint(theme.primaryColor)
-                        .padding()
-                }
-                
-                Button(action: validateAndLoadLibrary) {
-                    Text("Continue")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(steamIDInput.isEmpty ? theme.secondaryColor : theme.primaryColor)
-                        .cornerRadius(10)
-                }
-                .disabled(steamIDInput.isEmpty || isLoading)
-                .padding(.horizontal, 32)
-                
-                Spacer()
-            }
-            .padding()
-            .background(theme.backgroundColor)
-            .alert("How to find your Steam ID", isPresented: $showingHelp) {
-                Button("OK", role: .cancel) { }
-            } message: {
-                Text("""
-                    1. Open Steam and go to your profile
-                    2. Right-click on your profile page and select "Copy Page URL"
-                    3. Your Steam ID is the long number in the URL
-                    
-                    Example: https://steamcommunity.com/profiles/76561198000000000/
-                    Steam ID: 76561198000000000
-                    
-                    Note: Make sure your profile is set to Public in privacy settings.
-                    """)
-            }
-            .navigationDestination(isPresented: $navigateToLibrary) {
-                MainTabView()
-            }
-        }
-    }
-    
-    @State private var showingHelp = false
-    
-    private func validateAndLoadLibrary() {
-        guard !steamIDInput.isEmpty else { return }
-        
-        isLoading = true
-        
-        Task {
-            // Save Steam ID
-            Secrets.steamID = steamIDInput
-            UserDefaults.standard.set(steamIDInput, forKey: "userSteamID")
-            
-            // Attempt to load library
-            let libraryManager = LibraryManager.shared
-            do {
-                let ownedGames = try await SteamService.shared.fetchMyGames()
-                
-                // Fetch details and sync all owned games to the backend
-                let userID = steamIDInput
-                for game in ownedGames {
-                    if let details = await SteamService.shared.fetchGameDetails(appid: game.id) {
-                        AppManager.gameCache[game.id] = details
-                        try? await BackendService.addGame(details, userID: userID)
-                    }
-                }
-
-                await MainActor.run {
-                    isLoading = false
-                    navigateToLibrary = true
-                }
-            } catch {
-                await MainActor.run {
-                    isLoading = false
-                }
-            }
-        }
     }
 }
 

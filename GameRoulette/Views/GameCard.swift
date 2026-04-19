@@ -6,7 +6,6 @@
 //
 import SwiftUI
 
-// MARK: - Game Card
 struct GameCard: View {
     let game: SteamGame
     @State private var gameDetails: LibraryGame?
@@ -15,7 +14,6 @@ struct GameCard: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Header Image
             if let headerImage = gameDetails?.headerImage, let url = URL(string: headerImage) {
                 AsyncImage(url: url) { phase in
                     switch phase {
@@ -44,7 +42,7 @@ struct GameCard: View {
             } else {
                 Rectangle()
                     .fill(theme.secondaryBackgroundColor.opacity(0.3))
-                    .frame(height: 120)
+                    .frame(height: 85)
                     .overlay(
                         Image(systemName: "gamecontroller")
                             .font(.largeTitle)
@@ -54,20 +52,25 @@ struct GameCard: View {
             
             // Game Information
             VStack(alignment: .leading, spacing: 8) {
-                // Game Title
-                Text(game.name)
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                    .lineLimit(2)
-                    .multilineTextAlignment(.leading)
-                    .foregroundColor(theme.textColor)
+                // Game Title with accent color underline
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(game.name)
+                        .font(.headline)
+                        .fontWeight(.semibold)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
+                        .foregroundColor(theme.textColor)
+                    
+                    Rectangle()
+                        .fill(theme.accentColor)
+                        .frame(width: 40, height: 2)
+                }
                 
-                // Developer Info
                 if let developers = gameDetails?.developers, !developers.isEmpty {
                     HStack(spacing: 4) {
                         Image(systemName: "person.fill")
                             .font(.caption2)
-                            .foregroundColor(theme.secondaryTextColor)
+                            .foregroundColor(theme.primaryColor)
                         Text(developers.joined(separator: ", "))
                             .font(.caption)
                             .lineLimit(1)
@@ -75,7 +78,6 @@ struct GameCard: View {
                     }
                 }
                 
-                // Genre Tags
                 if let genres = gameDetails?.genres, !genres.isEmpty {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 4) {
@@ -84,9 +86,9 @@ struct GameCard: View {
                                     .font(.caption2)
                                     .padding(.horizontal, 6)
                                     .padding(.vertical, 2)
-                                    .background(theme.primaryColor.opacity(0.1))
+                                    .background(theme.accentColor.opacity(0.1))
                                     .cornerRadius(4)
-                                    .foregroundColor(theme.primaryColor)
+                                    .foregroundColor(theme.accentColor)
                             }
                             if genres.count > 3 {
                                 Text("+\(genres.count - 3)")
@@ -97,15 +99,14 @@ struct GameCard: View {
                     }
                 }
                 
-                // Library Status Badge (if applicable)
                 if gameDetails?.inLibrary == true {
-                    HStack {
+                    HStack(spacing: 4) {
                         Image(systemName: "checkmark.circle.fill")
                             .font(.caption2)
-                            .foregroundColor(theme.successColor)
+                            .foregroundColor(theme.accentColor)
                         Text("In Library")
                             .font(.caption2)
-                            .foregroundColor(theme.successColor)
+                            .foregroundColor(theme.accentColor)
                     }
                     .padding(.top, 2)
                 }
@@ -117,7 +118,7 @@ struct GameCard: View {
         .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(theme.secondaryTextColor.opacity(0.2), lineWidth: 1)
+                .stroke(theme.accentColor.opacity(0.2), lineWidth: 1)
         )
         .task {
             await loadGameDetails()
@@ -125,7 +126,6 @@ struct GameCard: View {
     }
     
     private func loadGameDetails() async {
-        // Check cache first
         if let cached = AppManager.gameCache[game.id] {
             gameDetails = cached
             isLoading = false
