@@ -11,7 +11,7 @@
 
 ## Overview
 
-GameRoulette is a full-stack iOS app that connects to your Steam library and recommends what to play next. Build a personal library, set priorities, mark games complete, and hit the roulette button to get a smart, ranked list of what to play; powered by a content-based filtering algorithm running on a Go backend.
+GameRoulette is a full-stack iOS app by Erik Camacho and Thienban Nguyen that connects to your Steam library and recommends what to play next. Build a personal library, set priorities, mark games complete, and hit the roulette button to get a smart, ranked list of what to play; powered by a content-based filtering algorithm running on a Go backend.
 
 NOTE: Firebase is used in the Go backend. Steam IDs are provided in the .txt file for testing.
 
