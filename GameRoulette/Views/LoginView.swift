@@ -181,7 +181,6 @@ struct LoginView: View {
         }
         
         Task {
-            Secrets.steamID = steamIDInput
             UserDefaults.standard.set(steamIDInput, forKey: "userSteamID")
             
             do {

@@ -207,20 +207,11 @@ struct SettingsView: View {
     }
     
     private func getCurrentSteamID() -> String {
-        let savedID = UserDefaults.standard.string(forKey: "userSteamID")
-        let secretsID = Secrets.steamID
-        
-        if let savedID = savedID, !savedID.isEmpty {
-            return savedID
-        } else if !secretsID.isEmpty && secretsID != "" {
-            return secretsID
-        }
-        return "Not set"
+        UserDefaults.standard.string(forKey: "userSteamID") ?? "Not set"
     }
-    
+
     private func performLogout() {
         UserDefaults.standard.removeObject(forKey: "userSteamID")
-        Secrets.steamID = ""
         libraryManager.userLibrary = []
         AppManager.gameCache.removeAll()
         dismiss()
@@ -232,7 +223,7 @@ struct SettingsView: View {
             isResyncing = true
         }
         
-        let savedSteamID = UserDefaults.standard.string(forKey: "userSteamID") ?? Secrets.steamID
+        let savedSteamID = UserDefaults.standard.string(forKey: "userSteamID") ?? ""
         
         guard !savedSteamID.isEmpty && savedSteamID != "" else {
             await MainActor.run {

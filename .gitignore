@@ -1,18 +1,18 @@
-GoogleService-Info.plist
-**/GoogleService-Info.plist
-Secrets.swift
-**/Secrets.swift
-
 # Environment & secrets
 .env
 .env.*
 *.env
 
 # Firebase / Google credentials
+GoogleService-Info.plist
+**/GoogleService-Info.plist
 firebase-credentials.json
 *-credentials.json
 *-service-account.json
 serviceAccountKey.json
+backend/firebase-service-account.json
+backend/.env
+backend/gameroulette-backend
 
 # macOS
 .DS_Store
