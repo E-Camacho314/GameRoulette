@@ -104,14 +104,14 @@ docker compose up --build
 ### iOS App
 
 1. Open `GameRoulette.xcodeproj` in Xcode
-2. Add your `GoogleService-Info.plist` (Firebase config) to the `GameRoulette/` folder — this file is gitignored
+2. Add your `GoogleService-Info.plist` (Firebase config) to the `GameRoulette/` folder; this file is gitignored
 3. *(Optional)* Create `GameRoulette/Secrets.swift` to pre-fill your Steam ID at build time:
    ```swift
    enum Secrets {
        static var steamID = "your_steam_id"
    }
    ```
-   If this file is absent, the app's Welcome screen will prompt you to enter your Steam ID manually on first launch — no file required.
+   If this file is absent, the app's Welcome screen will prompt you to enter your Steam ID manually on first launch; no file required.
 4. In `BackendService.swift`, set the production URL for Release builds
 5. Select a simulator or device and press `Cmd+R`
 
@@ -119,9 +119,9 @@ docker compose up --build
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `GET` | `/steam/apps` | Proxy — full Steam game catalog |
-| `GET` | `/steam/appdetails?appids=<id>` | Proxy — game details from Steam Store |
-| `GET` | `/steam/mygames?steamID=<id>` | Proxy — games owned by a Steam user |
+| `GET` | `/steam/apps` | Proxy - full Steam game catalog |
+| `GET` | `/steam/appdetails?appids=<id>` | Proxy - game details from Steam Store |
+| `GET` | `/steam/mygames?steamID=<id>` | Proxy - games owned by a Steam user |
 | `GET` | `/library?userID=<id>` | Fetch user's saved library |
 | `POST` | `/library?userID=<id>` | Add a game to the library |
 | `DELETE` | `/library/{gameID}?userID=<id>` | Remove a game |
@@ -132,9 +132,9 @@ docker compose up --build
 
 The `/recommend` endpoint runs a three-stage pipeline:
 
-1. **Cold start guard** — if fewer than 3 non-complete games exist, returns them sorted by priority (no scoring)
-2. **TF-IDF scoring** — genres are weighted by how distinctive they are in the user's library (rare genres the user specifically collected score higher than generic ones like "Indie" or "Action")
-3. **MMR selection** — instead of returning the top 5 scores directly, Maximal Marginal Relevance iteratively picks games that balance relevance (λ=0.7) against redundancy with already-selected games, ensuring genre diversity in results
+1. **Cold start guard** - if fewer than 3 non-complete games exist, returns them sorted by priority (no scoring)
+2. **TF-IDF scoring** - genres are weighted by how distinctive they are in the user's library (rare genres the user specifically collected score higher than generic ones like "Indie" or "Action")
+3. **MMR selection** - instead of returning the top 5 scores directly, Maximal Marginal Relevance iteratively picks games that balance relevance (λ=0.7) against redundancy with already-selected games, ensuring genre diversity in results
 
 Games marked **Complete** are excluded from recommendations unless the entire library is complete, in which case they are used as the candidate pool.
 
