@@ -1,4 +1,4 @@
-# 🎰 GameRoulette
+# GameRoulette
 
 <div align="center">
 
@@ -9,20 +9,22 @@
 
 </div>
 
-## 📖 Overview
+## Overview
 
-GameRoulette is a full-stack iOS app that connects to your Steam library and recommends what to play next. Build a personal library, set priorities, mark games complete, and hit the roulette button to get a smart, ranked list of what to play — powered by a content-based filtering algorithm running on a Go backend.
+GameRoulette is a full-stack iOS app that connects to your Steam library and recommends what to play next. Build a personal library, set priorities, mark games complete, and hit the roulette button to get a smart, ranked list of what to play; powered by a content-based filtering algorithm running on a Go backend.
 
-## ✨ Features
+NOTE: Firebase is used in the Go backend. Steam IDs are provided in the .txt file for testing.
 
-- 🎮 **Steam Integration** — Browse and search Steam's full catalog, pull in details, screenshots, genres, and descriptions
-- 📚 **Personal Library** — Add games, set priority (High / Medium / Low), and mark them complete; toggle between grid and list view
-- 🤖 **Smart Recommendations** — Content-based filtering using TF-IDF weighted cosine similarity + Maximal Marginal Relevance (MMR) to surface relevant *and* diverse picks
-- 🎲 **Roulette Mode** — Get 5 ranked recommendations from your library; falls back to Steam catalog for new users
-- 🗺️ **Developer Map** — View the real-world location of a game's developer studio on an interactive map
-- 🎨 **Theming** — Customizable UI themes with light and dark modes
+## Features
 
-## 🛠️ Tech Stack
+- **Steam Integration** — Browse and search Steam's full catalog, pull in details, screenshots, genres, and descriptions
+- **Personal Library** - Add games, set priority (High / Medium / Low), and mark them complete; toggle between grid and list view
+- **Smart Recommendations** - Content-based filtering using TF-IDF weighted cosine similarity + Maximal Marginal Relevance (MMR) to surface relevant *and* diverse picks
+- **Roulette Mode** - Get 5 ranked recommendations from your library; falls back to Steam catalog for new users
+- **Developer Map** - View the real-world location of a game's developer studio on an interactive map
+- **Theming** - Customizable UI themes with light and dark modes
+
+## Tech Stack
 
 **Frontend**
 - <img src="https://img.shields.io/badge/Swift-FA7343?style=for-the-badge&logo=swift&logoColor=white" alt="Swift"/>
@@ -35,7 +37,7 @@ GameRoulette is a full-stack iOS app that connects to your Steam library and rec
 - Google Cloud Firestore (user library persistence)
 - Steam Web API (game catalog + details proxy)
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 GameRoulette/
@@ -72,11 +74,11 @@ GameRoulette/
         └── SettingsView.swift        # Theme picker + account management
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### iOS App
 
-> **Note:** The backend is already running on a hosted server — no backend setup is required to run the iOS app.
+> **Note:** The backend is already running on a hosted server; no backend setup is required to run the iOS app.
 
 #### Prerequisites
 
@@ -85,7 +87,7 @@ GameRoulette/
 - An iPhone or iPad running iOS 16+, or use the built-in Xcode Simulator
 - A Steam account with a **public** profile and at least one game in your library
 
-> **Note:** No API keys or credential files are needed. The `BACKEND_API_KEY` is already set in `Info.plist` and the Go backend is hosted — just build and run.
+> **Note:** No API keys or credential files are needed. The `BACKEND_API_KEY` is already set in `Info.plist` and the Go backend is hosted; just build and run.
 
 #### Steps
 
@@ -164,30 +166,30 @@ docker compose up --build -d
 
 After standing up your own backend, update `BackendService.baseURL` in `GameRoulette/Models/BackendService.swift` and set `BACKEND_API_KEY` in `Info.plist` to match your `API_KEY`.
 
-## 🔌 API Endpoints
+## API Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `GET` | `/steam/apps` | Proxy — full Steam game catalog |
-| `GET` | `/steam/appdetails?appids=<id>` | Proxy — game details from Steam Store |
-| `GET` | `/steam/mygames?steamID=<id>` | Proxy — games owned by a Steam user |
+| `GET` | `/steam/apps` | Proxy - full Steam game catalog |
+| `GET` | `/steam/appdetails?appids=<id>` | Proxy - game details from Steam Store |
+| `GET` | `/steam/mygames?steamID=<id>` | Proxy - games owned by a Steam user |
 | `GET` | `/library?userID=<id>` | Fetch user's saved library |
 | `POST` | `/library?userID=<id>` | Add a game to the library |
 | `DELETE` | `/library/{gameID}?userID=<id>` | Remove a game |
 | `PATCH` | `/library/{gameID}?userID=<id>` | Update game priority |
 | `GET` | `/recommend?userID=<id>` | Get top 5 recommended games |
 
-## 🤖 Recommendation Algorithm
+## Recommendation Algorithm
 
 The `/recommend` endpoint runs a three-stage pipeline:
 
-1. **Cold start guard** — if fewer than 3 non-complete games exist, returns them sorted by priority (no scoring)
-2. **TF-IDF scoring** — genres are weighted by how distinctive they are in the user's library (rare genres the user specifically collected score higher than generic ones like "Indie" or "Action")
-3. **MMR selection** — instead of returning the top 5 scores directly, Maximal Marginal Relevance iteratively picks games that balance relevance (λ=0.7) against redundancy with already-selected games, ensuring genre diversity in results
+1. **Cold start guard** - if fewer than 3 non-complete games exist, returns them sorted by priority (no scoring)
+2. **TF-IDF scoring** - genres are weighted by how distinctive they are in the user's library (rare genres the user specifically collected score higher than generic ones like "Indie" or "Action")
+3. **MMR selection** - instead of returning the top 5 scores directly, Maximal Marginal Relevance iteratively picks games that balance relevance (λ=0.7) against redundancy with already-selected games, ensuring genre diversity in results
 
 Games marked **Complete** are excluded from recommendations unless the entire library is complete, in which case they are used as the candidate pool.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 Authored by [E-Camacho314](https://github.com/E-Camacho314), and [tpnguy](https://github.com/tpnguy).
 
