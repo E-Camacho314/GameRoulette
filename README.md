@@ -18,10 +18,10 @@ NOTE: Firebase is used in the Go backend. Steam IDs are provided in the .txt fil
 ## Features
 
 -  **Steam Integration** - Browse and search Steam's full catalog, pull in details, screenshots, genres, and descriptions
--  **Personal Library** — Add games, set priority (High / Medium / Low), and mark them complete
--  **Smart Recommendations** — Content-based filtering using TF-IDF weighted cosine similarity + Maximal Marginal Relevance (MMR) to surface relevant *and* diverse picks
--  **Roulette Mode** — Get 5 ranked recommendations from your library; falls back to Steam catalog for new users
--  **Theming** — Customizable UI themes
+-  **Personal Library** - Add games, set priority (High / Medium / Low), and mark them complete
+-  **Smart Recommendations** - Content-based filtering using TF-IDF weighted cosine similarity + Maximal Marginal Relevance (MMR) to surface relevant *and* diverse picks
+-  **Roulette Mode** - Get 5 ranked recommendations from your library; falls back to Steam catalog for new users
+-  **Theming** - Customizable UI themes
 
 ##  Tech Stack
 
