@@ -17,7 +17,7 @@ NOTE: Firebase is used in the Go backend. Steam IDs are provided in the .txt fil
 
 ## Features
 
-- **Steam Integration** — Browse and search Steam's full catalog, pull in details, screenshots, genres, and descriptions
+- **Steam Integration** - Browse and search Steam's full catalog, pull in details, screenshots, genres, and descriptions
 - **Personal Library** - Add games, set priority (High / Medium / Low), and mark them complete; toggle between grid and list view
 - **Smart Recommendations** - Content-based filtering using TF-IDF weighted cosine similarity + Maximal Marginal Relevance (MMR) to surface relevant *and* diverse picks
 - **Roulette Mode** - Get 5 ranked recommendations from your library; falls back to Steam catalog for new users
@@ -125,7 +125,7 @@ GameRoulette/
 
 ### Self-Hosting the Backend (optional)
 
-Skip this section if you just want to run the iOS app — the hosted backend handles everything.
+Skip this section if you just want to run the iOS app - the hosted backend handles everything.
 
 #### Prerequisites
 
