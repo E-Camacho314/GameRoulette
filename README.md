@@ -1,4 +1,4 @@
-# 🎰 GameRoulette
+# GameRoulette
 
 <div align="center">
 
@@ -9,19 +9,21 @@
 
 </div>
 
-## 📖 Overview
+## Overview
 
-GameRoulette is a full-stack iOS app that connects to your Steam library and recommends what to play next. Build a personal library, set priorities, mark games complete, and hit the roulette button to get a smart, ranked list of what to play — powered by a content-based filtering algorithm running on a Go backend.
+GameRoulette is a full-stack iOS app that connects to your Steam library and recommends what to play next. Build a personal library, set priorities, mark games complete, and hit the roulette button to get a smart, ranked list of what to play; powered by a content-based filtering algorithm running on a Go backend.
 
-## ✨ Features
+NOTE: Firebase is used in the Go backend. Steam IDs are provided in the .txt file for testing.
 
-- 🎮 **Steam Integration** — Browse and search Steam's full catalog, pull in details, screenshots, genres, and descriptions
-- 📚 **Personal Library** — Add games, set priority (High / Medium / Low), and mark them complete
-- 🤖 **Smart Recommendations** — Content-based filtering using TF-IDF weighted cosine similarity + Maximal Marginal Relevance (MMR) to surface relevant *and* diverse picks
-- 🎲 **Roulette Mode** — Get 5 ranked recommendations from your library; falls back to Steam catalog for new users
-- 🎨 **Theming** — Customizable UI themes
+## Features
 
-## 🛠️ Tech Stack
+-  **Steam Integration** - Browse and search Steam's full catalog, pull in details, screenshots, genres, and descriptions
+-  **Personal Library** — Add games, set priority (High / Medium / Low), and mark them complete
+-  **Smart Recommendations** — Content-based filtering using TF-IDF weighted cosine similarity + Maximal Marginal Relevance (MMR) to surface relevant *and* diverse picks
+-  **Roulette Mode** — Get 5 ranked recommendations from your library; falls back to Steam catalog for new users
+-  **Theming** — Customizable UI themes
+
+##  Tech Stack
 
 **Frontend**
 - <img src="https://img.shields.io/badge/Swift-FA7343?style=for-the-badge&logo=swift&logoColor=white" alt="Swift"/>
@@ -34,7 +36,7 @@ GameRoulette is a full-stack iOS app that connects to your Steam library and rec
 - Google Cloud Firestore (user library persistence)
 - Steam Web API (game catalog + details proxy)
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 GameRoulette/
@@ -63,7 +65,7 @@ GameRoulette/
         └── GameDetailsView.swift
 ```
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Prerequisites
 
@@ -113,7 +115,7 @@ docker compose up --build
 4. In `BackendService.swift`, set the production URL for Release builds
 5. Select a simulator or device and press `Cmd+R`
 
-## 🔌 API Endpoints
+##  API Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -126,7 +128,7 @@ docker compose up --build
 | `PATCH` | `/library/{gameID}?userID=<id>` | Update game priority |
 | `GET` | `/recommend?userID=<id>` | Get top 5 recommended games |
 
-## 🤖 Recommendation Algorithm
+##  Recommendation Algorithm
 
 The `/recommend` endpoint runs a three-stage pipeline:
 
@@ -136,7 +138,7 @@ The `/recommend` endpoint runs a three-stage pipeline:
 
 Games marked **Complete** are excluded from recommendations unless the entire library is complete, in which case they are used as the candidate pool.
 
-## 🙏 Acknowledgments
+##  Acknowledgments
 
 Authored by [E-Camacho314](https://github.com/E-Camacho314), and [tpnguy](https://github.com/tpnguy).
 
