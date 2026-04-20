@@ -155,21 +155,11 @@ struct WelcomeView: View {
         }
         
         let savedSteamID = UserDefaults.standard.string(forKey: "userSteamID")
-        let secretsSteamID = Secrets.steamID
-        
-        var validSteamID: String?
-        
-        if let savedID = savedSteamID, !savedID.isEmpty {
-            validSteamID = savedID
-        }
-        else if !secretsSteamID.isEmpty && secretsSteamID != "" && secretsSteamID != "" {
-            validSteamID = secretsSteamID
-        }
-        
-        if let steamID = validSteamID {
+
+        if let steamID = savedSteamID, !steamID.isEmpty {
             do {
                 let ownedGames = try await SteamService.shared.fetchMyGames()
-                
+
                 if ownedGames.isEmpty {
                     await MainActor.run {
                         withAnimation(.easeInOut(duration: 0.3)) {
@@ -180,8 +170,8 @@ struct WelcomeView: View {
                     }
                     return
                 }
-                
-                let userID = UserDefaults.standard.string(forKey: "userSteamID") ?? Secrets.steamID
+
+                let userID = steamID
                 for game in ownedGames {
                     if let details = await SteamService.shared.fetchGameDetails(appid: game.id) {
                         details.inLibrary = true

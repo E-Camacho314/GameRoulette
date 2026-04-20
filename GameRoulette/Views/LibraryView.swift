@@ -263,7 +263,8 @@ struct LibraryView: View {
         isLoadingLibrary = true
         libraryError = nil
         
-        let savedSteamID = UserDefaults.standard.string(forKey: "userSteamID") ?? Secrets.steamID
+        // Get the saved Steam ID
+        let savedSteamID = UserDefaults.standard.string(forKey: "userSteamID") ?? ""
         
         guard !savedSteamID.isEmpty && savedSteamID != "" else {
             libraryError = "No Steam ID found. Please restart the app and enter your Steam ID."
@@ -272,7 +273,7 @@ struct LibraryView: View {
         }
         
         do {
-            let userID = UserDefaults.standard.string(forKey: "userSteamID") ?? Secrets.steamID
+            let userID = UserDefaults.standard.string(forKey: "userSteamID") ?? ""
             libraryManager.userLibrary = try await BackendService.fetchLibrary(userID: userID)
         } catch {
             libraryError = "Failed to load library: \(error.localizedDescription)"
